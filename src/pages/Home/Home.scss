@@ -1,0 +1,15 @@
+.home{
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-wrap: wrap ;
+    gap: 40px;
+    .home_item{
+        box-shadow: 0 1px 5px gray;
+        min-width: 270px;
+        text-align: center;
+        .home_icon{
+            font-size: 50px;
+        }
+    }
+}
