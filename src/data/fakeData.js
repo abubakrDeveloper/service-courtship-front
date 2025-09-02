@@ -1,0 +1,14 @@
+export const admins = [
+  { id: 1, firstName: "Jasur", lastName: "Toshpulatov", phone: "+998901112233", role: "admin", filialId: 1 },
+  { id: 2, firstName: "Dilshod", lastName: "Karimov", phone: "+998903334455", role: "manager", filialId: 2 }
+];
+
+export const filials = [
+  { id: 1, name: "Chilonzor", logo: "chilonzor.png", startedAt: "2023-01-01", magazinId: 1 },
+  { id: 2, name: "Yunusobod", logo: "yunusobod.png", startedAt: "2024-02-15", magazinId: 1 }
+];
+
+export const products = [
+  { id: 1, productName: "Samsung A15", count: 50, takingPrice: 1500000, sellingPrice: 2000000, promotion: 5, filialId: 1, firmaId: 1, date: "2025-08-28" },
+  { id: 2, productName: "Lenovo Laptop", count: 20, takingPrice: 5000000, sellingPrice: 6200000, promotion: 10, filialId: 2, firmaId: 2, date: "2025-08-29" }
+];
