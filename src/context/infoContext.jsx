@@ -23,6 +23,7 @@ const defaultUser = [
     phoneNumber: "+998999114755",
     password: "1234",
     token: "yyy",
+    
     url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS01TSCeWXMnbEeCluyGi669GhMkeS9l--5TAEh0TtXlUD_FkgCvvYkUgCLTYSlU4s7cOc&usqp=CAU",
   },
 ];

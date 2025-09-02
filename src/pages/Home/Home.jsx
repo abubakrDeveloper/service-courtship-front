@@ -33,10 +33,10 @@ const Home = () => {
                     <i className='home_icon'><TeamOutlined/></i>
                     <h2>Xodimlar</h2>
                 </Link>
-                <Link className="home_item" onClick={() => addTab("Mijozlar", "/customers")}>
+                {/* <Link className="home_item" onClick={() => addTab("Mijozlar", "/customers")}>
                     <i className='home_icon'><UserOutlined/></i>
                     <h2>Mijozlar</h2>
-                </Link>
+                </Link> */}
                 <Link className="home_item" onClick={() => addTab("Sozlamalar", "/settings")}>
                     <i className='home_icon'><SettingOutlined /></i>
                     <h2>Sozlamalar</h2>
