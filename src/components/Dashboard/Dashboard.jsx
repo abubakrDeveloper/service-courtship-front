@@ -20,7 +20,7 @@ const Dashboard = () => {
     { key: "ishlab-chiqarish", icon: <DesktopOutlined />, label: "Ishlab chiqarish", onClick: () => addTab("Ishlab chiqarish", "/production") },
     { key: "moliya", icon: <MoneyCollectOutlined />, label: "Moliya", onClick: () => addTab("Moliya", "/finance") },
     { key: "xodimlar", icon: <TeamOutlined />, label: "Xodimlar", onClick: () => addTab("Xodimlar", "/employees") },
-    { key: "mijozlar", icon: <UserOutlined />, label: "Mijozlar", onClick: () => addTab("Mijozlar", "/customers") },
+    // { key: "mijozlar", icon: <UserOutlined />, label: "Mijozlar", onClick: () => addTab("Mijozlar", "/customers") },
     { key: "sozlamalar", icon: <SettingOutlined />, label: "Sozlamalar", onClick: () => addTab("Sozlamalar", "/settings") },
     {
       key: "exit",
