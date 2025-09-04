@@ -1,60 +1,143 @@
-import React, { useEffect, useState } from "react";
-import { DesktopOutlined, FileOutlined, HomeOutlined, LogoutOutlined, MoneyCollectOutlined, OrderedListOutlined, PieChartOutlined, SettingOutlined, TeamOutlined, UserOutlined,} from "@ant-design/icons";
+import React, { useState } from "react";
+import {
+  DesktopOutlined,
+  FileOutlined,
+  HomeOutlined,
+  LogoutOutlined,
+  MoneyCollectOutlined,
+  OrderedListOutlined,
+  PieChartOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Avatar, Layout, Menu, Tabs } from "antd";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
 import "./Dashboard.scss";
 
 import * as Icons from "@ant-design/icons";
+
+const { Header, Content, Footer, Sider } = Layout;
 
 const renderIcon = (iconName) => {
   const IconComponent = Icons[iconName];
   return IconComponent ? <IconComponent /> : null;
 };
 
-const { Header, Content, Footer, Sider } = Layout;
-
 const Dashboard = () => {
-  const { exit, currentUser, tabs, activeKey, setActiveKey, addTab, removeTab } = useInfoContext();
+  const { exit, currentUser, tabs, activeKey, setActiveKey, addTab, removeTab } =
+    useInfoContext();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
-const items = [
-   { key: "/", icon: <HomeOutlined />, label: "Bosh sahifa", onClick: () => addTab("Bosh sahifa", "/", 'HomeOutlined') },
-  { key: "hisobotlar", icon: <FileOutlined />, label: "Hisobotlar", onClick: () => addTab("Hisobotlar", "/reports", 'FileOutlined') },
-  { key: "tovarlar", icon: <OrderedListOutlined />, label: "Tovarlar", onClick: () => addTab("Tovarlar", "/products", 'OrderedListOutlined') },
-  { key: "inventarizatsiya", icon: <PieChartOutlined />, label: "Inventarizatsiya", onClick: () => addTab("Inventarizatsiya", "/inventory", 'PieChartOutlined') },
-  { key: "ishlab-chiqarish", icon: <DesktopOutlined />, label: "Ishlab chiqarish", onClick: () => addTab("Ishlab chiqarish", "/production", 'DesktopOutlined') },
-  { key: "moliya", icon: <MoneyCollectOutlined />, label: "Moliya", onClick: () => addTab("Moliya", "/finance", 'MoneyCollectOutlined') },
-  { key: "xodimlar", icon: <TeamOutlined />, label: "Xodimlar", onClick: () => addTab("Xodimlar", "/employees", 'TeamOutlined') },
-  { key: "mijozlar", icon: <UserOutlined />, label: "Mijozlar", onClick: () => addTab("Mijozlar", "/customers", 'UserOutlined') },
-  { key: "sozlamalar", icon: <SettingOutlined />, label: "Sozlamalar", onClick: () => addTab("Sozlamalar", "/settings", 'SettingOutlined') },
-  {
-    key: "exit",
-    icon: <LogoutOutlined />,
-    label: "Exit",
-    onClick: exit,
-    style: { color: "white", backgroundColor: "red" },
-  },
-];
+  // Menyu elementlarini rollar bilan
+  const menuItems = [
+    {
+      key: "/",
+      icon: <HomeOutlined />,
+      label: "Bosh sahifa",
+      roles: ["admin", "manager", "seller"],
+      onClick: () => addTab("Bosh sahifa", "/", "HomeOutlined"),
+    },
+    {
+      key: "reports",
+      icon: <FileOutlined />,
+      label: "Hisobotlar",
+      roles: ["admin", "manager"],
+      onClick: () => addTab("Hisobotlar", "/reports", "FileOutlined"),
+    },
+    {
+      key: "products",
+      icon: <OrderedListOutlined />,
+      label: "Tovarlar",
+      roles: ["admin", "seller"],
+      onClick: () => addTab("Tovarlar", "/products", "OrderedListOutlined"),
+    },
+    {
+      key: "inventory",
+      icon: <PieChartOutlined />,
+      label: "Inventarizatsiya",
+      roles: ["admin", "manager"],
+      onClick: () => addTab("Inventarizatsiya", "/inventory", "PieChartOutlined"),
+    },
+    {
+      key: "production",
+      icon: <DesktopOutlined />,
+      label: "Ishlab chiqarish",
+      roles: ["admin", "manager"],
+      onClick: () => addTab("Ishlab chiqarish", "/production", "DesktopOutlined"),
+    },
+    {
+      key: "finance",
+      icon: <MoneyCollectOutlined />,
+      label: "Moliya",
+      roles: ["admin"],
+      onClick: () => addTab("Moliya", "/finance", "MoneyCollectOutlined"),
+    },
+    {
+      key: "employees",
+      icon: <TeamOutlined />,
+      label: "Xodimlar",
+      roles: ["admin", "manager"],
+      onClick: () => addTab("Xodimlar", "/employees", "TeamOutlined"),
+    },
+    // {
+    //   key: "customers",
+    //   icon: <UserOutlined />,
+    //   label: "Mijozlar",
+    //   roles: ["admin", "manager", "seller"],
+    //   onClick: () => addTab("Mijozlar", "/customers", "UserOutlined"),
+    // },
+    {
+      key: "settings",
+      icon: <SettingOutlined />,
+      label: "Sozlamalar",
+      roles: ["admin"],
+      onClick: () => addTab("Sozlamalar", "/settings", "SettingOutlined"),
+    },
+    {
+      key: "exit",
+      icon: <LogoutOutlined />,
+      label: "Chiqish",
+      roles: ["admin", "manager", "seller"],
+      onClick: exit,
+      style: { color: "white", backgroundColor: "red" },
+    },
+  ];
+
+  // Foydalanuvchi roli asosida filter
+  const allowedItems = menuItems.filter((item) =>
+    item.roles.includes(currentUser?.role)
+  );
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
         <div className="profile-box" style={{ padding: 16, textAlign: "center" }}>
-          <Avatar size={64} src={currentUser?.url || "https://i.pravatar.cc/150?img=3"} />
-          {!collapsed && <h3 style={{ color: "white", marginTop: 8 }}>{currentUser?.phone}</h3>}
+          <Avatar
+            size={64}
+            src={currentUser?.url || "https://i.pravatar.cc/150?img=3"}
+          />
+          {!collapsed && (
+            <h3 style={{ color: "white", marginTop: 8 }}>
+              {currentUser?.phone}
+            </h3>
+          )}
         </div>
-        <Menu theme="dark" mode="inline" items={items}/>
+        <Menu theme="dark" mode="inline" items={allowedItems} />
       </Sider>
 
       <Layout>
         <Header style={{ padding: "0 16px", background: "#fff" }}>
-         <Tabs
+          <Tabs
             hideAdd
             type="editable-card"
-            activeKey={activeKey} 
+            activeKey={activeKey}
             onChange={(key) => {
               setActiveKey(key);
               navigate(key);
@@ -80,7 +163,9 @@ const items = [
           </div>
         </Content>
 
-        <Footer style={{ textAlign: "center" }}>Ant Design ©{new Date().getFullYear()} Created by Ant UED</Footer>
+        <Footer style={{ textAlign: "center" }}>
+          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+        </Footer>
       </Layout>
     </Layout>
   );

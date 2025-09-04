@@ -9,8 +9,8 @@ export const useInfoContext = () => useContext(InfoContext);
 const defaultUser = [
   {
     id: "999881241244",
-    firstname: "Miraziz",
-    lastname: "Ravshanov",
+    firstName: "Miraziz",
+    lastName: "Ravshanov",
     phone: "+998934905134",
     password: "1234",
     token: "xxx",
@@ -19,8 +19,8 @@ const defaultUser = [
   },
   {
     id: "999885756377",
-    firstname: "Abubakr",
-    lastname: "Rashidov",
+    firstName: "Abubakr",
+    lastName: "Rashidov",
     phone: "+998999114755",
     password: "1234",
     token: "yyy",
