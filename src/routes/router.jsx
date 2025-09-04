@@ -1,4 +1,3 @@
-// routes/router.jsx
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { InfoProvider } from "../context/infoContext";
 
@@ -14,8 +13,8 @@ import Employees from "../pages/Employees/Employees";
 import Customers from "../pages/Customers/Customers";
 import Settings from "../pages/Settings/Settings";
 import Home from "../pages/Home/Home";
+import ProtectedRoute from "./ProtectedRoute";
 
-// Layout: Router ichida InfoProvider
 const AppProvidersLayout = () => (
   <InfoProvider>
     <Outlet />
@@ -25,24 +24,28 @@ const AppProvidersLayout = () => (
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <AppProvidersLayout />, // ← endi navigate InfoProvider ichida ishlaydi
+    element: <AppProvidersLayout />,
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
 
       {
         path: "/",
-        element: <Dashboard />,
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
         children: [
-          {index: true, element: <Home/>},
-          { path: "reports",     element: <Reports /> },
-          { path: "products",    element: <Products /> },
-          { path: "inventory",   element: <Inventory /> },
-          { path: "production",  element: <Production /> },
-          { path: "finance",     element: <Finance /> },
-          { path: "employees",   element: <Employees /> },
-          { path: "customers",   element: <Customers /> },
-          { path: "settings",    element: <Settings /> },
+          { index: true, element: <Home /> },
+          { path: "reports", element: <Reports /> },
+          { path: "products", element: <Products /> },
+          { path: "inventory", element: <Inventory /> },
+          { path: "production", element: <Production /> },
+          { path: "finance", element: <Finance /> },
+          { path: "employees", element: <Employees /> },
+          { path: "customers", element: <Customers /> },
+          { path: "settings", element: <Settings /> },
         ],
       },
     ],

@@ -11,15 +11,15 @@ export default function Login() {
 
     const foundUser = defaultUser.find(
       (user) =>
-        user.phoneNumber === values.phoneNumber &&
+        user.phone === values.phone &&
         user.password === values.password
     );
 
     if (foundUser) {
-      localStorage.setItem("userId", foundUser._id);
+      localStorage.setItem("userId", foundUser.id);
       localStorage.setItem("access_token", foundUser.token);
       setCurrentUser(foundUser)
-      setUserId(foundUser._id)
+      setUserId(foundUser.id)
       navigate("/");
     } else {
       error("Telefon raqam yoki parol xato!");
@@ -43,7 +43,7 @@ export default function Login() {
         > 
           <Form.Item
             label="Phone"
-            name="phoneNumber"
+            name="phone"
             rules={[{ required: true, message: "Please input your phone number!" }]}
           >
             <Input />

@@ -3,6 +3,14 @@ import { DesktopOutlined, FileOutlined, HomeOutlined, LogoutOutlined, MoneyColle
 import { Avatar, Layout, Menu, Tabs } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
+import "./Dashboard.scss";
+
+import * as Icons from "@ant-design/icons";
+
+const renderIcon = (iconName) => {
+  const IconComponent = Icons[iconName];
+  return IconComponent ? <IconComponent /> : null;
+};
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -39,26 +47,32 @@ const Dashboard = () => {
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="profile-box" style={{ padding: 16, textAlign: "center" }}>
           <Avatar size={64} src={currentUser?.url || "https://i.pravatar.cc/150?img=3"} />
-          {!collapsed && <h3 style={{ color: "white", marginTop: 8 }}>{currentUser?.phoneNumber}</h3>}
+          {!collapsed && <h3 style={{ color: "white", marginTop: 8 }}>{currentUser?.phone}</h3>}
         </div>
         <Menu theme="dark" mode="inline" items={items}/>
       </Sider>
 
       <Layout>
         <Header style={{ padding: "0 16px", background: "#fff" }}>
-          <Tabs
+         <Tabs
             hideAdd
             type="editable-card"
-            onEdit={(targetKey, action) => action === "remove" && removeTab(targetKey)}
-            activeKey={activeKey}
+            activeKey={activeKey} 
             onChange={(key) => {
               setActiveKey(key);
               navigate(key);
             }}
+            onEdit={(targetKey, action) =>
+              action === "remove" && removeTab(targetKey)
+            }
             items={tabs.map((tab) => ({
               key: tab.key,
-              label: tab.label,
-              closable: tab.key !== "/dashboard", // bosh sahifani yopib bo‘lmaydi
+              label: (
+                <span className="tab-label">
+                  {renderIcon(tab.icon)} {tab.label}
+                </span>
+              ),
+              closable: tab.key !== "/dashboard",
             }))}
           />
         </Header>
