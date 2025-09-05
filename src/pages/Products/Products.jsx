@@ -1,75 +1,126 @@
+import { Button, Modal, Form, Input, Table, Space, Popconfirm, message, DatePicker } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import { useState } from "react";
-import { Button, Table, Modal, Input } from "antd";
-import './Products.scss';
-
-const mockProducts = [
-  { id: 1, name: "Mahsulot 1", price: 100 },
-  { id: 2, name: "Mahsulot 2", price: 200 },
-];
+import { useInfoContext } from "../../context/infoContext";
+import { useNavigate } from "react-router-dom";
 
 const Products = () => {
-  const [products, setProducts] = useState(mockProducts);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: "", price: "" });
+   const navigate = useNavigate();
+  const {defaultUser, addTab} = useInfoContext();
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [data, setData] = useState(defaultUser || []);
+  const [form] = Form.useForm();
 
-  const handleAdd = () => {
-    setProducts([...products, { ...newProduct, id: Date.now() }]);
-    setIsModalOpen(false);
-    setNewProduct({ name: "", price: "" });
+  // Qo‘shish / Tahrirlash
+  const handleSubmit = () => {
+    form.validateFields().then(values => {
+      const newEmp = {
+        id: editing ? editing.id : Date.now(),
+        ...values,
+        startDate: values.startDate.format("YYYY-MM-DD"),
+      };
+
+      if (editing) {
+        setData(prev => prev.map(emp => (emp.id === editing.id ? newEmp : emp)));
+        message.success("Tavar yangilandi!");
+      } else {
+        setData(prev => [...prev, newEmp]);
+        message.success("Tavar qo‘shildi!");
+      }
+
+      form.resetFields();
+      setEditing(null);
+      setOpen(false);
+    });
   };
 
-  const handleDelete = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
+  // O‘chirish
+  const handleDelete = id => {
+    setData(prev => prev.filter(emp => emp.id !== id));
+    message.success("Tavar o‘chirildi!");
   };
+
+  const columns = [
+    { title: "Ism", dataIndex: "firstname" },
+    { title: "Familiya", dataIndex: "lastname" },
+    { title: "Telefon", dataIndex: "phone" },
+    { title: "Lavozim", dataIndex: "position" },
+    { title: "Maosh", dataIndex: "salary" },
+    { title: "Boshlagan sana", dataIndex: "startDate" },
+    {
+      title: "Amallar",
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditing(record);
+              form.setFieldsValue({
+                ...record,
+                startDate: dayjs(record.startDate),
+              });
+              setOpen(true);
+            }}
+          />
+          <Popconfirm
+            title="Tavarni o‘chirishni xohlaysizmi?"
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Button danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Products</h1>
-      <Button type="primary" onClick={() => setIsModalOpen(true)}>
-        + Add Product
+    <div>
+      {/* Tepada btn */}
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => {navigate("/products/new"); addTab("Tovar yaratish", "/products/new", 'PlusOutlined')}}
+        style={{ marginBottom: 16 }}
+      >
+        Tavar qo‘shish
       </Button>
 
-      <Table
-        className="mt-4"
-        rowKey="id"
-        dataSource={products}
-        columns={[
-          { title: "ID", dataIndex: "id" },
-          { title: "Name", dataIndex: "name" },
-          { title: "Price", dataIndex: "price" },
-          {
-            title: "Action",
-            render: (_, record) => (
-              <Button danger onClick={() => handleDelete(record.id)}>
-                Delete
-              </Button>
-            ),
-          },
-        ]}
-      />
+      {/* Pastda jadval */}
+      <Table rowKey="id" dataSource={data} columns={columns} pagination={false} />
 
+      {/* Modal */}
       <Modal
-        title="Add Product"
-        open={isModalOpen}
-        onOk={handleAdd}
-        onCancel={() => setIsModalOpen(false)}
+        title={editing ? "Tavarni tahrirlash" : "Yangi Tavar qo‘shish"}
+        open={open}
+        onCancel={() => {
+          setOpen(false);
+          setEditing(null);
+          form.resetFields();
+        }}
+        onOk={handleSubmit}
       >
-        <Input
-          placeholder="Name"
-          className="mb-2"
-          value={newProduct.name}
-          onChange={(e) =>
-            setNewProduct({ ...newProduct, name: e.target.value })
-          }
-        />
-        <Input
-          placeholder="Price"
-          type="number"
-          value={newProduct.price}
-          onChange={(e) =>
-            setNewProduct({ ...newProduct, price: e.target.value })
-          }
-        />
+        <Form form={form} layout="vertical">
+          <Form.Item name="firstname" label="Ism" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="lastname" label="Familiya" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="phone" label="Telefon" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="position" label="Lavozim" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="salary" label="Maosh" rules={[{ required: true }]}>
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item name="startDate" label="Boshlagan sana" rules={[{ required: true }]}>
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

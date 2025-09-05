@@ -2,16 +2,16 @@
   "admins": [
     {
       "id": 1,
-      "firstName": "Jasur",
-      "lastName": "Toshpulatov",
+      "firstname": "Jasur",
+      "lastname": "Toshpulatov",
       "phone": "+998901112233",
       "role": "admin",
       "filialId": 1
     },
     {
       "id": 2,
-      "firstName": "Dilshod",
-      "lastName": "Karimov",
+      "firstname": "Dilshod",
+      "lastname": "Karimov",
       "phone": "+998903334455",
       "role": "manager",
       "filialId": 2

@@ -2,11 +2,13 @@ import { Button, Modal, Form, Input, Table, Space, Popconfirm, message, DatePick
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useInfoContext } from "../../context/infoContext";
 
 const Employees = () => {
+  const {defaultUser} = useInfoContext();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(defaultUser || []);
   const [form] = Form.useForm();
 
   // Qo‘shish / Tahrirlash

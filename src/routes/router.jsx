@@ -16,6 +16,7 @@ import Settings from "../pages/Settings/Settings";
 import Home from "../pages/Home/Home";
 
 import ProtectedRoute from "../layouts/ProtectedRoute";
+import CreateProduct from "../pages/Products/CreateProduct";
 
 const AppProvidersLayout = () => (
   <InfoProvider>
@@ -52,9 +53,19 @@ export const router = createBrowserRouter([
             path: "products",
             element: (
               <ProtectedRoute roles={["admin", "seller"]}>
-                <Products />
+                <Outlet /> {/* Bu joyga children lar tushadi */}
               </ProtectedRoute>
             ),
+            children: [
+              {
+                index: true, // /products
+                element: <Products />,
+              },
+              {
+                path: "new", // /products/new
+                element: <CreateProduct />,
+              },
+            ],
           },
           {
             path: "inventory",

@@ -1,6 +1,6 @@
 export const admins = [
-  { id: 1, firstName: "Jasur", lastName: "Toshpulatov", phone: "+998901112233", role: "admin", filialId: 1 },
-  { id: 2, firstName: "Dilshod", lastName: "Karimov", phone: "+998903334455", role: "manager", filialId: 2 }
+  { id: 1, firstname: "Jasur", lastname: "Toshpulatov", phone: "+998901112233", role: "admin", filialId: 1 },
+  { id: 2, firstname: "Dilshod", lastname: "Karimov", phone: "+998903334455", role: "manager", filialId: 2 }
 ];
 
 export const filials = [

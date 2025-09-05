@@ -25,7 +25,7 @@ export default function Register() {
         >
           <Form.Item
             label="First Name"
-            name="firstName"
+            name="firstname"
             rules={[{ required: true, message: "Please input your first name!" }]}
           >
             <Input />
@@ -33,7 +33,7 @@ export default function Register() {
 
           <Form.Item
             label="Last Name"
-            name="lastName"
+            name="lastname"
             rules={[{ required: true, message: "Please input your last name!" }]}
           >
             <Input />
