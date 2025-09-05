@@ -1,17 +1,29 @@
-import { Form, Input, Button, Card } from "antd";
+import { Form, Input, Button, Card, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useInfoContext } from "../../../context/infoContext";
 
-export default function Register() {
+export default function Login() {
+  const {success, error, setCurrentUser, setUserId, contextHolder, defaultUser} = useInfoContext()
   const navigate = useNavigate();
+ 
 
   const onFinish = (values) => {
-    console.log("Form values:", values);
 
-    // 🔹 Bu joyda siz backend API ga so‘rov yuborasiz:
-    // axios.post("/api/auth/register", values)
+    const foundUser = defaultUser.find(
+      (user) =>
+        user.phone === values.phone &&
+        user.password === values.password
+    );
 
-    // muvaffaqiyatli bo‘lsa:
-    navigate("/login");
+    if (foundUser) {
+      localStorage.setItem("userId", foundUser.id);
+      localStorage.setItem("access_token", foundUser.token);
+      setCurrentUser(foundUser)
+      setUserId(foundUser.id)
+      navigate("/");
+    } else {
+      error("Telefon raqam yoki parol xato!");
+    }
   };
 
   return (
@@ -22,28 +34,13 @@ export default function Register() {
       height: "100vh",
       background: "#f0f2f5"
     }}>
-      <Card title="Register" style={{ width: 400 }}>
+      {contextHolder}
+      <Card title="Login" style={{ width: 400 }}>
         <Form
           name="register"
           layout="vertical"
           onFinish={onFinish}
-        >
-          <Form.Item
-            label="First Name"
-            name="firstName"
-            rules={[{ required: true, message: "Please input your first name!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Last Name"
-            name="lastName"
-            rules={[{ required: true, message: "Please input your last name!" }]}
-          >
-            <Input />
-          </Form.Item>
-
+        > 
           <Form.Item
             label="Phone"
             name="phone"
@@ -62,12 +59,12 @@ export default function Register() {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
-              Register
+              Login
             </Button>
           </Form.Item>
 
           <Form.Item>
-            <Button type="link" onClick={() => navigate("/login")} block>
+            <Button type="link" onClick={() => navigate("/register")} block>
               Already have an account? Login
             </Button>
           </Form.Item>

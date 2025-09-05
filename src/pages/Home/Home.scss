@@ -3,11 +3,13 @@
     align-items: center;
     justify-content: start;
     flex-wrap: wrap ;
-    gap: 40px;
+    gap: 30px;
     .home_item{
         box-shadow: 0 1px 5px gray;
         min-width: 270px;
+        padding: 30px;
         text-align: center;
+        border-radius: 10px;
         .home_icon{
             font-size: 50px;
         }
