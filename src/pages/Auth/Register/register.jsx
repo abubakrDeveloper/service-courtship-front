@@ -1,12 +1,48 @@
-import { Form, Input, Button, Card } from "antd";
+import { useState } from "react";
+import { Form, Input, Button, Card, message } from "antd";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
+  // Vite env o'zgaruvchisi
+  // const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+  const server_url = process.env.SERVER_URL;
+
+  const onFinish = async (values) => {
+    setLoading(true);
     console.log("Form values:", values);
-    navigate("/login");
+
+    try {
+      const res = await fetch(`${SERVER_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // serverdan kelgan xatolik xabarini ko'rsatamiz (agar bor bo'lsa)
+        const errMsg = data?.message || `Server responded: ${res.status}`;
+        message.error(errMsg);
+        setLoading(false);
+        return;
+      }
+
+      message.success("Ro'yxatdan o'tish muvaffaqiyatli! Iltimos login qiling.");
+      // agar token qaytsa va uni saqlash kerak bo'lsa shu yerda saqlang
+      // localStorage.setItem('token', data.accessToken);
+
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      message.error("Tarmoq xatosi. Iltimos internetni tekshirib qayta urinib ko'ring.");
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +78,10 @@ export default function Register() {
           <Form.Item
             label="Phone"
             name="phone"
-            rules={[{ required: true, message: "Please input your phone number!" }]}
+            rules={[
+              { required: true, message: "Please input your phone number!" },
+              { pattern: /^\+?\d{9,15}$/, message: "Noto'g'ri telefon format (misol: +998901234567)" }
+            ]}
           >
             <Input />
           </Form.Item>
@@ -50,13 +89,16 @@ export default function Register() {
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[
+              { required: true, message: "Please input your password!" },
+              { min: 6, message: "Parol kamida 6 ta belgidan bo'lishi kerak" }
+            ]}
           >
             <Input.Password />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" htmlType="submit" block loading={loading}>
               Register
             </Button>
           </Form.Item>

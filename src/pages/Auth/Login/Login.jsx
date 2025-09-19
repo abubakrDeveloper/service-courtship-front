@@ -64,9 +64,9 @@ export default function Login() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="link" onClick={() => navigate("/register")} block>
+            {/* <Button type="link" onClick={() => navigate("/register")} block>
               Already have an account? Login
-            </Button>
+            </Button> */}
           </Form.Item>
         </Form>
       </Card>
