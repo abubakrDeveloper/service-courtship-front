@@ -1,28 +1,39 @@
+
+
 import { Form, Input, Button, Card, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useInfoContext } from "../../../context/infoContext";
 
 export default function Login() {
-  const {success, error, setCurrentUser, setUserId, contextHolder, defaultUser} = useInfoContext()
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
- 
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
+    try {
+      const res = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(values),
+      });
 
-    const foundUser = defaultUser.find(
-      (user) =>
-        user.phone === values.phone &&
-        user.password === values.password
-    );
+      if (!res.ok) {
+        throw new Error("Login failed");
+      }
 
-    if (foundUser) {
-      localStorage.setItem("userId", foundUser.id);
-      localStorage.setItem("access_token", foundUser.token);
-      setCurrentUser(foundUser)
-      setUserId(foundUser.id)
-      navigate("/");
-    } else {
-      error("Telefon raqam yoki parol xato!");
+      const data = await res.json();
+
+      // Tokenni localStorage'ga saqlash
+      localStorage.setItem("token", data.token);
+
+      messageApi.success("Login muvaffaqiyatli!");
+      console.log("Backend javobi:", data);
+
+      // User paneliga yo'naltirish
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      messageApi.error("Login xatolik!");
     }
   };
 
@@ -35,16 +46,16 @@ export default function Login() {
       background: "#f0f2f5"
     }}>
       {contextHolder}
-      <Card title="Login" style={{ width: 400 }}>
+      <Card title="Login" style={{ width: 420 }}>
         <Form
-          name="register"
+          name="login"
           layout="vertical"
           onFinish={onFinish}
-        > 
+        >
           <Form.Item
             label="Phone"
             name="phone"
-            rules={[{ required: true, message: "Please input your phone number!" }]}
+            rules={[{ required: true, message: "Iltimos telefon raqamni kiriting" }]}
           >
             <Input />
           </Form.Item>
@@ -52,7 +63,7 @@ export default function Login() {
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[{ required: true, message: "Iltimos parolni kiriting" }]}
           >
             <Input.Password />
           </Form.Item>
@@ -61,12 +72,6 @@ export default function Login() {
             <Button type="primary" htmlType="submit" block>
               Login
             </Button>
-          </Form.Item>
-
-          <Form.Item>
-            {/* <Button type="link" onClick={() => navigate("/register")} block>
-              Already have an account? Login
-            </Button> */}
           </Form.Item>
         </Form>
       </Card>
