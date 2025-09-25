@@ -13,7 +13,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "antd": "^5.27.1",
     "axios": "^1.11.0",
-    "framer-motion": "^12.23.12",
+    "framer-motion": "^12.23.19",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.543.0",
     "react": "^18.3.1",

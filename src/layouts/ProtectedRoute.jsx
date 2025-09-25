@@ -5,7 +5,7 @@ import { hasRole, ROLES } from "../utils/roleUtils";
 const ProtectedRoute = ({ children, roles }) => {
   const { currentUser, userId } = useInfoContext();
 
-  if (!userId) {
+  if (!userId || !currentUser) {
     return <Navigate to="/login" replace />;
   }
 
