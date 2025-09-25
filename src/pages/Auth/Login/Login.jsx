@@ -9,7 +9,7 @@ export default function Login() {
 
   const onFinish = async (values) => {
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch("http://localhost:3000/auth/login/manager", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -24,7 +24,7 @@ export default function Login() {
       const data = await res.json();
 
       // Tokenni localStorage'ga saqlash
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.accessToken);
 
       messageApi.success("Login muvaffaqiyatli!");
       console.log("Backend javobi:", data);
