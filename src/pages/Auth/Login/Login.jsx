@@ -1,21 +1,23 @@
 
 
-import { Form, Input, Button, Card, message } from "antd";
+import { Form, Input, Button, Card } from "antd";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../../services/authRequest";
 import { useInfoContext } from "../../../context/infoContext";
+import { useState } from "react";
 
 export default function Login() {
-  const [messageApi, contextHolder] = message.useMessage();
-  const {setCurrentUser, setToken} = useInfoContext()
+  const {setCurrentUser, setToken, success, error} = useInfoContext()
+  const [submit, setSubmit] = useState(false)
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+    setSubmit(true)
     try {
       const {data} = await login(values)
       console.log(data);
       
-
+      
       if (data) {
         // Tokenni localStorage'ga saqlash
         localStorage.setItem("token", data.accessToken);
@@ -24,12 +26,14 @@ export default function Login() {
           ...data.user,
           role: data.role 
         });
-        messageApi.success("Xush kelibsiz!");
+        success(`Assalomu alaykum ${data.user.firstName}, tizimga muvaffaqiyatli kirdingiz!`);
+        setSubmit(false)
         navigate("/");
       }
     } catch (err) {
+      setSubmit(false)
       console.log(err);
-      messageApi.error(err?.response?.data?.message);
+      error(err?.response?.data?.message);
     }
   };
 
@@ -42,7 +46,6 @@ export default function Login() {
       height: "100vh",
       background: "#f0f2f5"
     }}>
-      {contextHolder}
       <Card title={false} style={{ width: 420 }}>
         <h2 style={{textAlign: 'center', fontSize: '20px', fontFamily: "sans-serif"}}>Login</h2>
         <Form
@@ -67,7 +70,7 @@ export default function Login() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" loading={submit} iconPosition="end" htmlType="submit" block>
               Login
             </Button>
           </Form.Item>

@@ -93,7 +93,7 @@ export const InfoProvider = ({ children }) => {
 
   return (
     <InfoContext.Provider value={value}>
-      {contextHolder} {/* ← shu bo‘lmasa message ko‘rinmaydi */}
+      {contextHolder}
       {children}
     </InfoContext.Provider>
   );
