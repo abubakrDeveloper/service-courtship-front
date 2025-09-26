@@ -11,7 +11,7 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, Tabs } from "antd";
+import { Avatar, Layout, Menu, Space, Tabs } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
 import "./Dashboard.scss";
@@ -111,10 +111,7 @@ const Dashboard = () => {
         onCollapse={(value) => setCollapsed(value)}
       >
         <div className="profile-box" style={{ padding: 16, textAlign: "center" }}>
-          <Avatar
-            size={64}
-            src={currentUser?.url || "https://i.pravatar.cc/150?img=3"}
-          />
+          <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }} shape="circle" size={64} icon={<UserOutlined />} />
         </div>
         <Menu
           mode="inline"
