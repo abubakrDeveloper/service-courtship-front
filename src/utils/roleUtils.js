@@ -1,9 +1,9 @@
 // utils/roleUtils.js
 export const ROLES = {
-  ADMIN: "admin",
-  MANAGER: "manager",
-  SELLER: "seller",
-  EMPLOYEE: "employee",
+  ADMIN: "ADMIN",
+  MANAGER: "MANAGER",
+  SELLER: "SELLER",
+  EMPLOYEE: "EMPLOYEE",
 };
 
 export const hasRole = (user, roles) => {

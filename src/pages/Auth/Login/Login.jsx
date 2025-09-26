@@ -2,43 +2,40 @@
 
 import { Form, Input, Button, Card, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../../services/authRequest";
+import { useInfoContext } from "../../../context/infoContext";
 
 export default function Login() {
   const [messageApi, contextHolder] = message.useMessage();
+  const {setCurrentUser, setToken} = useInfoContext()
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
     try {
-      const res = await fetch("http://localhost:3000/auth/login/manager", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(values),
-      });
+      const {data} = await login(values)
+      console.log(data);
+      
 
-      if (!res.ok) {
-        throw new Error("Login failed");
+      if (data) {
+        // Tokenni localStorage'ga saqlash
+        localStorage.setItem("token", data.accessToken);
+        setToken(data.accessToken);
+        setCurrentUser({
+          ...data.user,
+          role: data.role 
+        });
+        messageApi.success("Xush kelibsiz!");
+        navigate("/");
       }
-
-      const data = await res.json();
-
-      // Tokenni localStorage'ga saqlash
-      localStorage.setItem("token", data.accessToken);
-
-      messageApi.success("Login muvaffaqiyatli!");
-      console.log("Backend javobi:", data);
-
-      // User paneliga yo'naltirish
-      navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      messageApi.error("Login xatolik!");
+      console.log(err);
+      messageApi.error(err?.response?.data?.message);
     }
   };
 
   return (
     <div style={{
+      fontSize: "30px",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
@@ -46,7 +43,8 @@ export default function Login() {
       background: "#f0f2f5"
     }}>
       {contextHolder}
-      <Card title="Login" style={{ width: 420 }}>
+      <Card title={false} style={{ width: 420 }}>
+        <h2 style={{textAlign: 'center', fontSize: '20px', fontFamily: "sans-serif"}}>Login</h2>
         <Form
           name="login"
           layout="vertical"

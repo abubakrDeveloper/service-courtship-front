@@ -5,14 +5,12 @@ export const useAuth = () => {
   const { currentUser, setCurrentUser } = useInfoContext();
 
   const login = (user) => {
-    localStorage.setItem("userId", user.id);
-    localStorage.setItem("access_token", user.token);
+    localStorage.setItem("token", user.token);
     setCurrentUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
     setCurrentUser(null);
   };
 
