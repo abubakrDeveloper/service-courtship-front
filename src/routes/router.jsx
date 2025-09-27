@@ -44,7 +44,7 @@ export const router = createBrowserRouter([
           {
             path: "reports",
             element: (
-              <ProtectedRoute roles={["admin", "manager"]}>
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
                 <Reports />
               </ProtectedRoute>
             ),
@@ -52,7 +52,7 @@ export const router = createBrowserRouter([
           {
             path: "products",
             element: (
-              <ProtectedRoute roles={["admin", "seller"]}>
+              <ProtectedRoute roles={["ADMIN", "SELLER"]}>
                 <Outlet /> {/* Bu joyga children lar tushadi */}
               </ProtectedRoute>
             ),
@@ -70,7 +70,7 @@ export const router = createBrowserRouter([
           {
             path: "inventory",
             element: (
-              <ProtectedRoute roles={["admin", "manager"]}>
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
                 <Inventory />
               </ProtectedRoute>
             ),
@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
           {
             path: "production",
             element: (
-              <ProtectedRoute roles={["admin", "manager"]}>
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
                 <Production />
               </ProtectedRoute>
             ),
@@ -86,7 +86,7 @@ export const router = createBrowserRouter([
           {
             path: "finance",
             element: (
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["ADMIN"]}>
                 <Finance />
               </ProtectedRoute>
             ),
@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
           {
             path: "employees",
             element: (
-              <ProtectedRoute roles={["admin", "manager"]}>
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
                 <Employees />
               </ProtectedRoute>
             ),
@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
           {
             path: "customers",
             element: (
-              <ProtectedRoute roles={["admin", "manager", "seller"]}>
+              <ProtectedRoute roles={["ADMIN", "MANAGER", "SELLER"]}>
                 <Customers />
               </ProtectedRoute>
             ),
@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
           {
             path: "settings",
             element: (
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["ADMIN"]}>
                 <Settings />
               </ProtectedRoute>
             ),

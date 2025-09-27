@@ -8,7 +8,7 @@ const API = axios.create({
 });
 
 export const addReq = (data, method) => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     return API.post(`/api/${method}`, data, {
     headers: { token, verificationtoken: accessUrl },
     withCredentials: true,

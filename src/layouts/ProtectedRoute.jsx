@@ -1,19 +1,21 @@
 import { Navigate } from "react-router-dom";
 import { useInfoContext } from "../context/infoContext";
-import { hasRole, ROLES } from "../utils/roleUtils";
+import { hasRole } from "../utils/roleUtils";
 
 const ProtectedRoute = ({ children, roles }) => {
-  const { currentUser, userId } = useInfoContext();
-
-  if (!userId || !currentUser) {
+  const { currentUser, token } = useInfoContext();
+  
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 
   if (!currentUser) {
-    return <div>Yuklanmoqda...</div>; // userId bor, lekin hali user load bo‘lmadi
+    return <div>Yuklanmoqda...</div>; 
   }
 
   if (roles && !hasRole(currentUser, roles)) {
+    console.log("keldi");
+    
     return <Navigate to="/" replace />;
   }
 

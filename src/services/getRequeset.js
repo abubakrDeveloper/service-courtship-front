@@ -5,11 +5,11 @@ const accessUrl = import.meta.env.VITE_ACCESSTOKEN_SERVER;
 const API = axios.create({ baseURL: serverUrl });
 
 export const getReq = (method) =>
-  API.get(`/api/${method}`, {
+  API.get(`/${method}`, {
     headers: { verificationtoken: accessUrl },
   })
   
 export const getOneReq = (id, method) =>
-  API.get(`/api/${method}/${id}`, {
+  API.get(`/${method}/${id}`, {
     headers: { verificationtoken: accessUrl },
   });

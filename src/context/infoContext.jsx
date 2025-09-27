@@ -2,91 +2,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const InfoContext = createContext(null);
 export const useInfoContext = () => useContext(InfoContext);
-
-const defaultUser = [
-  {
-    id: "999881241244",
-    firstname: "Miraziz",
-    lastname: "Ravshanov",
-    phone: "+998934905134",
-    password: "1234",
-    position: "Direktor",
-    salary: "1200",
-    startDate: "12.05.2020",
-    token: "xxx",
-    role: "admin",
-    url: "https://cdn.pixabay.com/photo/2019/10/19/03/50/bmw-4560531_960_720.jpg",
-  },
-  {
-    id: "999885756377",
-    firstname: "Abubakr",
-    lastname: "Rashidov",
-    phone: "+998999114755",
-    password: "1234",
-    position: "Menejer",
-    salary: "500",
-    startDate: "8.11.2023",
-    token: "yyy",
-    role: "manager",    
-    url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS01TSCeWXMnbEeCluyGi669GhMkeS9l--5TAEh0TtXlUD_FkgCvvYkUgCLTYSlU4s7cOc&usqp=CAU",
-  },
-  {
-    id: "999881234577",
-    firstname: "Jasur",
-    lastname: "Toshpulatov",
-    phone: "+998901112233",
-    password: "1234",
-    position: "Tavar ombori",
-    salary: "300",
-    startDate: "30.03.2022",
-    token: "www",
-    role: "admin",
-    filialId: 1,
-    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Lykan_HyperSport.jpg/960px-Lykan_HyperSport.jpg"
-  },
-  {
-    id: "999885423677",
-    firstname: "Dilshod",
-    lastname: "Karimov",
-    phone: "+998903334455",
-    password: "1234",
-    position: "Bosh hisobchi",
-    salary: "800",
-    startDate: "23.07.2021",
-    token: "zzz",
-    role: "manager",
-    filialId: 2,
-    url: "https://static.vecteezy.com/system/resources/previews/023/977/547/non_2x/front-view-dark-silhouette-of-a-modern-luxury-black-car-isolated-on-black-background-ai-generated-free-photo.jpg"
-  }
-];
-
-const  filials = [
-  { "id": 1, "name": "Chilonzor", "logo": "chilonzor.png", "startedAt": "2023-01-01", "magazinId": 1 },
-  { "id": 2, "name": "Yunusobod", "logo": "yunusobod.png", "startedAt": "2024-02-15", "magazinId": 1 }
-];
-const products = [
-  { "id": 1, "productName": "Samsung A15", "count": 50, "takingPrice": 1500000, "sellingPrice": 2000000, "promotion": 5, "filialId": 1, "firmaId": 1, "date": "2025-08-28" },
-  { "id": 2, "productName": "Lenovo Laptop", "count": 20, "takingPrice": 5000000, "sellingPrice": 6200000, "promotion": 10, "filialId": 2, "firmaId": 2, "date": "2025-08-29" }
-];
-const sales = [
-  { "id": 1, "productName": "Samsung A15", "count": 2, "takingPrice": 1500000, "sellingPrice": 2000000, "promotion": 5, "filialId": 1, "firmaId": 1, "date": "2025-09-01" }
-]
 
 export const InfoProvider = ({ children }) => {
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useState(null);
   const [loader, setLoader] = useState(false);
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
 
-  const [products, setProducts] = useState([]);
-  const [dataCategory, setDataCategory] = useState([]);
-  const [dataBlog, setDataBlog] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [about, setAbout] = useState(null);
+  
   const [tabs, setTabs] = useState(() => {
     const savedTabs = localStorage.getItem("tabs");
     return savedTabs
@@ -133,34 +63,37 @@ export const InfoProvider = ({ children }) => {
   const warning = (text) => messageApi.open({ type: "warning", content: text });
   const loading = (text) => messageApi.open({ type: "loading", content: text });
 
-  useEffect(() => {
-    if (!userId) { setCurrentUser(null); return; }
-    const user = defaultUser.find(u => String(u.id) === String(userId));
-    setCurrentUser(user || null);
-  }, [userId]);
+  useEffect(() => {    
+    if (token && !currentUser) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+      } catch (error) {
+        exit();
+      }
+    }
+  }, [token]);
+
 
   const exit = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("userId");
-    setUserId(null);
+    setActiveKey
+    localStorage.clear();
     setCurrentUser(null);
     navigate("/login", { replace: true });
   };
 
   const value = {
     currentUser, setCurrentUser,
-    exit, userId, setUserId,
-    products, setProducts,
-    about, setAbout, defaultUser,
-    loader, setLoader, filials, sales,
-    dataCategory, dataBlog, setDataCategory, setDataBlog,
+    exit, about, setAbout,
+    loader, setLoader,
+    token, setToken,
     reviews, setReviews, tabs, setTabs, activeKey, setActiveKey, addTab, removeTab,
     success, error, warning, loading,
   };
 
   return (
     <InfoContext.Provider value={value}>
-      {contextHolder} {/* ← shu bo‘lmasa message ko‘rinmaydi */}
+      {contextHolder}
       {children}
     </InfoContext.Provider>
   );

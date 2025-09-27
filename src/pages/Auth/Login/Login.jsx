@@ -1,52 +1,53 @@
 
 
-import { Form, Input, Button, Card, message } from "antd";
+import { Form, Input, Button, Card } from "antd";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../../services/authRequest";
+import { useInfoContext } from "../../../context/infoContext";
+import { useState } from "react";
 
 export default function Login() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const {setCurrentUser, setToken, success, error} = useInfoContext()
+  const [submit, setSubmit] = useState(false)
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+    setSubmit(true)
     try {
-      const res = await fetch("http://localhost:3000/auth/login/manager", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) {
-        throw new Error("Login failed");
+      const {data} = await login(values)
+      console.log(data);
+      
+      
+      if (data) {
+        // Tokenni localStorage'ga saqlash
+        localStorage.setItem("token", data.accessToken);
+        setToken(data.accessToken);
+        setCurrentUser({
+          ...data.user,
+          role: data.role 
+        });
+        success(`Assalomu alaykum ${data.user.firstName}, tizimga muvaffaqiyatli kirdingiz!`);
+        setSubmit(false)
+        navigate("/");
       }
-
-      const data = await res.json();
-
-      // Tokenni localStorage'ga saqlash
-      localStorage.setItem("token", data.accessToken);
-
-      messageApi.success("Login muvaffaqiyatli!");
-      console.log("Backend javobi:", data);
-
-      // User paneliga yo'naltirish
-      navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      messageApi.error("Login xatolik!");
+      setSubmit(false)
+      console.log(err);
+      error(err?.response?.data?.message);
     }
   };
 
   return (
     <div style={{
+      fontSize: "30px",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       height: "100vh",
       background: "#f0f2f5"
     }}>
-      {contextHolder}
-      <Card title="Login" style={{ width: 420 }}>
+      <Card title={false} style={{ width: 420 }}>
+        <h2 style={{textAlign: 'center', fontSize: '20px', fontFamily: "sans-serif"}}>Login</h2>
         <Form
           name="login"
           layout="vertical"
@@ -69,7 +70,7 @@ export default function Login() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" loading={submit} iconPosition="end" htmlType="submit" block>
               Login
             </Button>
           </Form.Item>
