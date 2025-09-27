@@ -7,8 +7,8 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <>
-    <MemoryRouter>
+    <>
       <RouterProvider router={router} />
-    </MemoryRouter>
+    </>
   </>
 );
