@@ -29,10 +29,10 @@ const Profile = () => {
   const { currentUser: user, exit } = useInfoContext();
   const [lang, setLang] = useState(user.lang || "uz");
 
-  useEffect(() => {
-    setLang(user.lang || "uz");
-    setTheme(user.mode || "light");
-  }, [user]);
+  // useEffect(() => {
+  //   setLang(user.lang || "uz");
+  //   setTheme(user.mode || "light");
+  // }, [user]);
 
   const languages = [
     { value: "uz", label: "O‘zbekcha" },
