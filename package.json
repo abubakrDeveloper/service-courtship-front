@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "antd": "^5.27.1",
+    "antd-img-crop": "^4.25.0",
     "axios": "^1.11.0",
     "framer-motion": "^12.23.19",
     "jwt-decode": "^4.0.0",

@@ -1,38 +1,16 @@
-import { Button, Modal, Form, Input, Table, Space, Popconfirm, message, DatePicker } from "antd";
+import { Button, Form, Table, Space, Popconfirm, message, DatePicker } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useInfoContext } from "../../context/infoContext";
+import { Outlet } from "react-router-dom";
 
 const Employees = () => {
-  const {defaultUser} = useInfoContext();
+  const {defaultUser, addTab} = useInfoContext();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [data, setData] = useState(defaultUser || []);
   const [form] = Form.useForm();
-
-  // Qo‘shish / Tahrirlash
-  const handleSubmit = () => {
-    form.validateFields().then(values => {
-      const newEmp = {
-        id: editing ? editing.id : Date.now(),
-        ...values,
-        startDate: values.startDate.format("YYYY-MM-DD"),
-      };
-
-      if (editing) {
-        setData(prev => prev.map(emp => (emp.id === editing.id ? newEmp : emp)));
-        message.success("Xodim yangilandi!");
-      } else {
-        setData(prev => [...prev, newEmp]);
-        message.success("Xodim qo‘shildi!");
-      }
-
-      form.resetFields();
-      setEditing(null);
-      setOpen(false);
-    });
-  };
 
   // O‘chirish
   const handleDelete = id => {
@@ -79,7 +57,7 @@ const Employees = () => {
       <Button
         type="primary"
         icon={<PlusOutlined />}
-        onClick={() => setOpen(true)}
+        onClick={() => addTab("Xodim qo‘shish", "/employees/new", "PlusOutlined")}
         style={{ marginBottom: 16 }}
       >
         Xodim qo‘shish
@@ -87,39 +65,7 @@ const Employees = () => {
 
       {/* Pastda jadval */}
       <Table rowKey="id" dataSource={data} columns={columns} pagination={false} />
-
-      {/* Modal */}
-      <Modal
-        title={editing ? "Xodimni tahrirlash" : "Yangi xodim qo‘shish"}
-        open={open}
-        onCancel={() => {
-          setOpen(false);
-          setEditing(null);
-          form.resetFields();
-        }}
-        onOk={handleSubmit}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="firstname" label="Ism" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="lastname" label="Familiya" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="phone" label="Telefon" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="position" label="Lavozim" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="salary" label="Maosh" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="startDate" label="Boshlagan sana" rules={[{ required: true }]}>
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Outlet />
     </div>
   );
 };

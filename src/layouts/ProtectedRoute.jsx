@@ -13,9 +13,7 @@ const ProtectedRoute = ({ children, roles }) => {
     return <div>Yuklanmoqda...</div>; 
   }
 
-  if (roles && !hasRole(currentUser, roles)) {
-    console.log("keldi");
-    
+  if (roles && !hasRole(currentUser, roles)) {    
     return <Navigate to="/" replace />;
   }
 

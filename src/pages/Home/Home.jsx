@@ -7,14 +7,14 @@ import { useInfoContext } from "../../context/infoContext";
 const Home = () => {
     const { exit, currentUser, tabs, activeKey, setActiveKey, addTab, removeTab } = useInfoContext();
     let homeItems = [
-      { label: "Hisobotlar", icon: <FileOutlined />, path: "/reports" },
-      { label: "Tovarlar", icon: <OrderedListOutlined />, path: "/products" },
-      { label: "Inventarizatsiya", icon: <PieChartOutlined />, path: "/inventory" },
-      { label: "Ishlab chiqarish", icon: <DesktopOutlined />, path: "/production" },
-      { label: "Moliya", icon: <MoneyCollectOutlined />, path: "/finance" },
-      { label: "Xodimlar", icon: <TeamOutlined />, path: "/employees" },
-    //   { label: "Mijozlar", icon: <UserOutlined />, path: "/customers" },
-      { label: "Sozlamalar", icon: <SettingOutlined />, path: "/settings" },
+      { label: "Hisobotlar", icon: <FileOutlined />, path: "/reports", iconName: "FileOutlined"},
+      { label: "Tovarlar", icon: <OrderedListOutlined />, path: "/products", iconName: "OrderedListOutlined"},
+      { label: "Inventarizatsiya", icon: <PieChartOutlined />, path: "/inventory", iconName: "PieChartOutlined"},
+      { label: "Ishlab chiqarish", icon: <DesktopOutlined />, path: "/production", iconName: "DesktopOutlined"},
+      { label: "Moliya", icon: <MoneyCollectOutlined />, path: "/finance", iconName: "MoneyCollectOutlined"},
+      { label: "Xodimlar", icon: <TeamOutlined />, path: "/employees", iconName: "TeamOutlined"},
+    //   { label: "Mijozlar", icon: <UserOutlined />, path: "/customers", iconName: "UserOutlined"},
+      { label: "Sozlamalar", icon: <SettingOutlined />, path: "/settings", iconName: "SettingOutlined"},
     ];
     
     if (currentUser?.role !== "ADMIN") {
@@ -25,11 +25,11 @@ const Home = () => {
   return (
     <main>
         <div className="container">
-            <div className="grid grid-cols-5 gap-4 p-6">
+            <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:p-6">
                 {homeItems.map((item, index) => (
                 <div
                     key={index}
-                    onClick={() => addTab(item.label, item.path)}
+                    onClick={() => addTab(item.label, item.path, item.iconName)}
                     className="
                     flex flex-col items-center justify-center
                     rounded-xl cursor-pointer p-6

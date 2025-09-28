@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DesktopOutlined,
   FileOutlined,
@@ -11,14 +11,15 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, Space, Tabs } from "antd";
+import { Avatar, Layout, Menu, Tabs, Button } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
 import "./Dashboard.scss";
 
 import * as Icons from "@ant-design/icons";
+import { useTheme } from "../../context/ThemeContext";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const renderIcon = (iconName) => {
   const IconComponent = Icons[iconName];
@@ -26,7 +27,8 @@ const renderIcon = (iconName) => {
 };
 
 const Dashboard = () => {
-  const { exit, currentUser, tabs, activeKey, setActiveKey, addTab, removeTab } = useInfoContext();
+  const { exit, currentUser, tabs, activeKey, setActiveKey, addTab, removeTab, setTabs } = useInfoContext();
+  const { theme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 
@@ -103,19 +105,21 @@ const Dashboard = () => {
   );
 
   return (
-    <Layout style={{ height: "94vh"}}>
-      <Sider
-        theme="light"
-        collapsible
-        collapsed={collapsed}
+    <Layout style={{ height: "100vh"}}>
+      <Sider 
+        className="menu_slider"
+        theme={theme === "dark" ? "dark" : "light"}
+        collapsible={window.innerWidth >= 500}
+        collapsed={window.innerWidth <= 500 || collapsed}
         onCollapse={(value) => setCollapsed(value)}
       >
-        <div className="profile-box" style={{ padding: 16, textAlign: "center" }}>
-          <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }} shape="circle" size={64} icon={<UserOutlined />} />
+        <div className="profile-box" style={{ padding: 16, textAlign: "center", cursor: 'pointer'}} onClick={() => addTab("Profile", "/profile", "UserOutlined")}>
+            <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }} shape="circle" className={`${(window.innerWidth <= 500 || collapsed) ? "size-10" : " size-20"}`} icon={<UserOutlined style={(window.innerWidth <= 500 || collapsed) ? {} : {fontSize: "30px"}}/>} />
         </div>
         <Menu
+          theme={theme === "dark" ? "dark" : "light"}
           mode="inline"
-          style={{ display: "flex", flexDirection: "column", height: "100%", position: 'relative' }}
+          style={{ display: "flex", flexDirection: "column", height: "92%", position: 'relative' }}
           items={[
             // Rol asosida filterlangan itemlar
             ...allowedItems.map(item => ({
@@ -131,7 +135,7 @@ const Dashboard = () => {
               icon: <LogoutOutlined />,
               label: "Chiqish",
               onClick: exit,
-              style: { position: "absolute", bottom: 44, left: 0 , color: "white", backgroundColor: "red" },
+            style: { position: "absolute", bottom: (window.innerWidth >= 500 && !collapsed) ? 50 : 10, left: 0 , color: "white", backgroundColor: "red" },
             },
           ]}
         />
@@ -140,7 +144,9 @@ const Dashboard = () => {
 
 
       <Layout>
-        <Header style={{ padding: "16px", background: "#fff" }}>
+        <Header
+          style={{ padding: "20px 0 0 10px", background: "transparent"}}
+        >
           <Tabs
             hideAdd
             type="editable-card"
@@ -155,19 +161,40 @@ const Dashboard = () => {
             items={tabs.map((tab) => ({
               key: tab.key,
               label: (
-                <span className="tab-label">
-                  {renderIcon(tab.icon)} {tab.label}
-                </span>
+                <div className="tab-label">
+                  <span>{renderIcon(tab.icon)}</span>
+                  <span className="hidden sm:block">{tab.label}</span>
+                </div>
               ),
               closable: tab.key !== "/",
             }))}
+
+            // Qo‘shimcha tugma
+            tabBarExtraContent={{
+              left: (
+                <span
+                  className="clear_btn"
+                  onClick={() => {
+                    setTabs([{ key: "/", label: "Bosh sahifa", path: "/", icon: "HomeOutlined" }]);
+                    setActiveKey("/");
+                    navigate("/");
+                  }}
+                >
+                  <Icons.ClearOutlined />
+                </span>
+              ),
+            }}
           />
+
         </Header>
 
-        <Content style={{ margin: "16px"}}>
-          <div style={{ padding: 24, maxHeight: "88vh", overflowX: 'auto', background: "#fff" }}>
+        <Content style={{
+          padding: 24,
+          margin: "10px",
+          background: theme === "dark" ? "#0d1a26" : "#f5f5f5", // Layout’dan biroz farqli rang
+          maxHeight: "92vh", overflowX: 'auto'
+        }}>
             <Outlet />
-          </div>
         </Content>
 
         {/* <Footer style={{ textAlign: "center" }}>

@@ -1,5 +1,9 @@
+// router.jsx
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { InfoProvider } from "../context/infoContext";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { LanguageProvider } from "../context/LanguageContext";
+import { ConfigProvider, theme as antdTheme } from "antd";
 
 import Login from "../pages/Auth/Login/Login";
 import Register from "../pages/Auth/register/register";
@@ -17,10 +21,46 @@ import Home from "../pages/Home/Home";
 
 import ProtectedRoute from "../layouts/ProtectedRoute";
 import CreateProduct from "../pages/Products/CreateProduct";
+import Profile from "../pages/Profile/Profile";
+import AddEmployees from "../pages/Employees/AddEmployees";
+
+// 🎨 ConfigProvider ThemeWrapper
+const ThemeWrapper = ({ children }) => {
+  const { theme } = useTheme();
+
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: theme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+        token: {
+          colorPrimary: "#1677ff",
+          borderRadius: 8,
+          colorBgContainer: theme === "dark" ? "#001529" : "#f5f5f5", // Layout umumiy fon
+          colorBgLayout: theme === "dark" ? "#0d1a26" : "#fafafa",    // Content uchun alohida fon
+        },
+        components: {
+          Layout: {
+            siderBg: theme === "dark" ? "#001529" : "#fff",
+            headerBg: theme === "dark" ? "#141414" : "#fff",
+          },
+        },
+      }}
+    >
+
+      {children}
+    </ConfigProvider>
+  );
+};
 
 const AppProvidersLayout = () => (
   <InfoProvider>
-    <Outlet />
+    <ThemeProvider>
+      <LanguageProvider>
+        <ThemeWrapper>
+          <Outlet />
+        </ThemeWrapper>
+      </LanguageProvider>
+    </ThemeProvider>
   </InfoProvider>
 );
 
@@ -53,18 +93,14 @@ export const router = createBrowserRouter([
             path: "products",
             element: (
               <ProtectedRoute roles={["ADMIN", "SELLER"]}>
-                <Outlet /> {/* Bu joyga children lar tushadi */}
+                <Outlet />
               </ProtectedRoute>
             ),
             children: [
-              {
-                index: true, // /products
-                element: <Products />,
-              },
-              {
-                path: "new", // /products/new
-                element: <CreateProduct />,
-              },
+              { index: true, element: <Products /> },
+              { path: ":id", element: <CreateProduct /> },
+              { path: "new", element: <CreateProduct /> },
+              { path: "edit/:id", element: <CreateProduct /> },
             ],
           },
           {
@@ -95,9 +131,13 @@ export const router = createBrowserRouter([
             path: "employees",
             element: (
               <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
-                <Employees />
+                <Outlet />
               </ProtectedRoute>
             ),
+            children: [
+              { index: true, element: <Employees /> },
+              { path: "new", element: <AddEmployees /> },
+            ],
           },
           {
             path: "customers",
@@ -112,6 +152,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute roles={["ADMIN"]}>
                 <Settings />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "profile",
+            element: (
+              <ProtectedRoute roles={["ADMIN", "MANAGER", "SELLER"]}>
+                <Profile />
               </ProtectedRoute>
             ),
           },

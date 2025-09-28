@@ -67,6 +67,8 @@ export const InfoProvider = ({ children }) => {
     if (token && !currentUser) {
       try {
         const decoded = jwtDecode(token);
+        console.log(decoded);
+        
         setCurrentUser(decoded);
       } catch (error) {
         exit();

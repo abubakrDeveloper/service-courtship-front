@@ -10,6 +10,6 @@ export const sendVerication = (data) => {
 
 export const signUp = (formData) => API.post(`/auth/signup`, formData, {headers: {verificationtoken: accessUrl}})
 
-export const login = (formData) => API.post(`/auth/login/manager`, formData, {headers: {verificationtoken: accessUrl}})
+export const login = (formData) => API.post(`/auth/login/admin`, formData, {headers: {verificationtoken: accessUrl}})
 
 export const sendMail = (formData) => API.post(`/auth/mail`, formData, {headers: {verificationtoken: accessUrl}})
