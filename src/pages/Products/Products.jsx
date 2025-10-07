@@ -11,7 +11,7 @@ const Products = () => {
   const { addTab } = useInfoContext();
 
   const [filters, setFilters] = useState({
-    productName: "",
+    productName: "  ",
     filialId: "",
     firmId: "",
     categoryId: "",
@@ -23,9 +23,9 @@ const Products = () => {
   "takingPrice": 4500.5,
   "sellingPrice": 5500,
   "promotion": 10,
-  "filialId": "a1c7f753-5231-40e1-8d55-1faf00cd43f5",
-  "firmId": "6ff87e76-b461-4725-8dd1-e77f6f692e8a",
-  "categoryId": "6ff87e76-b461-4725-8dd1-e77f6f692e8a"
+  "filialId": "filialId",
+  "firmId": "firmaId",
+  "categoryId": "Kategoriya"
 }]);
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +48,9 @@ const Products = () => {
         page,
         limit,
       });
+
+      console.log("YYYYYYY",params);
+      
 
       const {data} = await getReq(`products?${params.toString()}`);      
       // setData(data.data);
@@ -73,7 +76,7 @@ const Products = () => {
   // 🔹 O‘chirish
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/products/${id}`);
+      await axios.delete(`/products/${id}`);
       message.success("Mahsulot o‘chirildi!");
       fetchProducts({ page: pagination.current, limit: pagination.pageSize });
     } catch (err) {
