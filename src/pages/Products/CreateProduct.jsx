@@ -13,9 +13,10 @@ const CreateProduct = () => {
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  console.log(id);
+  
   // 🔹 Update rejimida mahsulotni olish
   const fetchProduct = async () => {
-    if (!id) return;
     try {
       const res = await getReq(`products/${id}`);
       const product = res.data;
@@ -35,7 +36,9 @@ const CreateProduct = () => {
   };
 
   useEffect(() => {
-    fetchProduct();
+    if(id){
+      fetchProduct();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
