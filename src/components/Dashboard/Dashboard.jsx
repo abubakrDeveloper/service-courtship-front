@@ -11,7 +11,7 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, Tabs, Button } from "antd";
+import { Avatar, Layout, Menu, Tabs, Button, Image } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
 import "./Dashboard.scss";
@@ -52,7 +52,7 @@ const Dashboard = () => {
       key: "products",
       icon: <OrderedListOutlined />,
       label: "Tovarlar",
-      roles: ["ADMIN", "SELLER"],
+      roles: ["MANAGER", "SELLER"],
       onClick: () => addTab("Tovarlar", "/products", "OrderedListOutlined"),
     },
     {
@@ -73,7 +73,7 @@ const Dashboard = () => {
       key: "finance",
       icon: <MoneyCollectOutlined />,
       label: "Moliya",
-      roles: ["ADMIN"],
+      roles: ["MANAGER"],
       onClick: () => addTab("Moliya", "/finance", "MoneyCollectOutlined"),
     },
     {
@@ -94,7 +94,7 @@ const Dashboard = () => {
       key: "settings",
       icon: <SettingOutlined />,
       label: "Sozlamalar",
-      roles: ["ADMIN"],
+      roles: ["MANAGER"],
       onClick: () => addTab("Sozlamalar", "/settings", "SettingOutlined"),
     }
   ];
@@ -114,7 +114,18 @@ const Dashboard = () => {
         onCollapse={(value) => setCollapsed(value)}
       >
         <div className="profile-box" style={{ padding: 16, textAlign: "center", cursor: 'pointer'}} onClick={() => addTab("Profile", "/profile", "UserOutlined")}>
-            <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }} shape="circle" className={`${(window.innerWidth <= 500 || collapsed) ? "size-10" : " size-20"}`} icon={<UserOutlined style={(window.innerWidth <= 500 || collapsed) ? {} : {fontSize: "30px"}}/>} />
+            {currentUser.image ? 
+              <div className="profile_image flex items-center justify-center mx-auto" style={{borderRadius: "50%", overflow: 'hidden', maxWidth: "88px", maxHeight: '88px'}}>
+                <Image
+                  preview={false}
+                  style={{width: '100%', objectFit: 'contain'}}
+                  src={`${import.meta.env.VITE_SERVER_URL}${currentUser.image}`}
+                  /> 
+              </div>
+              : <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}
+                shape="circle" className={`${(window.innerWidth <= 500 || collapsed) ? "size-10" : " size-20"}`} 
+                icon={<UserOutlined style={(window.innerWidth <= 500 || collapsed) ? {} : {fontSize: "30px"}}/>} />
+              }
         </div>
         <Menu
           theme={theme === "dark" ? "dark" : "light"}

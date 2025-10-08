@@ -6,10 +6,10 @@ const API = axios.create({baseURL: serverURL})
 
 export const updateReq = (id, data, method) => {
     const token = localStorage.getItem("token");
-    return API.put(`/api/${method}/${id}`, data, { headers: {token, verificationtoken: accessUrl}});
+    return API.patch(`/${method}/${id}`, data, { headers: { Authorization: `Bearer ${token}`}});
 };
 
 export const likeReq = (id, data) => {
     const token = localStorage.getItem("token");
-    return API.put(`/api/user/like/${id}`, data, { headers: { token, verificationtoken: accessUrl}});
+    return API.put(`/user/like/${id}`, data, { headers: { token, verificationtoken: accessUrl}});
 }

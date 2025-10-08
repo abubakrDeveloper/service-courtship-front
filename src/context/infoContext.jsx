@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { getOneReq } from "../services/getRequeset";
 
 const InfoContext = createContext(null);
 export const useInfoContext = () => useContext(InfoContext);
@@ -13,10 +14,8 @@ export const InfoProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loader, setLoader] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
 
-  const [reviews, setReviews] = useState([]);
-  const [about, setAbout] = useState(null);
-  
   const [tabs, setTabs] = useState(() => {
     const savedTabs = localStorage.getItem("tabs");
     return savedTabs
@@ -63,19 +62,23 @@ export const InfoProvider = ({ children }) => {
   const warning = (text) => messageApi.open({ type: "warning", content: text });
   const loading = (text) => messageApi.open({ type: "loading", content: text });
 
-  useEffect(() => {    
-    if (token && !currentUser) {
+  useEffect(() => {
+    const getUser = async () => {
+      
       try {
-        const decoded = jwtDecode(token);
-        console.log(decoded);
-        
-        setCurrentUser(decoded);
-      } catch (error) {
-        exit();
+        const res = await getOneReq(userId, "auth/profile");
+        setCurrentUser(res?.data);
+      } catch (err) {
+        if(err?.response?.data?.Data === "foydalanuvchi topilmadi" || err?.response?.data?.StatusCode == 404){
+          exit()
+        }
+        if(err.message === "Network Error"){
+          window.alert("Birozdan keyin qaytib urunib ko'ring")
+        }
       }
-    }
-  }, [token]);
-
+    };
+    if (userId && !currentUser) getUser();
+  }, [userId]);
 
   const exit = () => {
     setActiveKey
@@ -86,10 +89,8 @@ export const InfoProvider = ({ children }) => {
 
   const value = {
     currentUser, setCurrentUser,
-    exit, about, setAbout,
-    loader, setLoader,
-    token, setToken,
-    reviews, setReviews, tabs, setTabs, activeKey, setActiveKey, addTab, removeTab,
+    exit, loader, setLoader, userId, setUserId,
+    token, setToken, tabs, setTabs, activeKey, setActiveKey, addTab, removeTab,
     success, error, warning, loading,
   };
 

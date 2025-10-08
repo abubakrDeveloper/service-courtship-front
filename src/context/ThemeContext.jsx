@@ -14,15 +14,6 @@ export const ThemeProvider = ({ children }) => {
   };
 
   const [theme, setTheme] = useState(getInitialTheme);
-
-  // currentUser.mode bo‘lsa, theme shu bo‘lishi kerak
-  // useEffect(() => {
-  //   if (currentUser?.mode) {
-  //     setTheme(currentUser.mode);
-  //     localStorage.setItem("theme", currentUser.mode);
-  //   }
-  // }, [currentUser]);
-
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);

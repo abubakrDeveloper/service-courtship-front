@@ -21,12 +21,10 @@ export default function Login() {
       if (data) {
         // Tokenni localStorage'ga saqlash
         localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("userId", data?.user?.id);
         setToken(data.accessToken);
-        setCurrentUser({
-          ...data.user,
-          role: data.role 
-        });
-        success(`Assalomu alaykum ${data.user.firstName}, tizimga muvaffaqiyatli kirdingiz!`);
+        setCurrentUser(data.user);
+        success(`Assalomu alaykum ${data.user.firstName}, Xush kelibsiz!`);
         setSubmit(false)
         navigate("/");
       }

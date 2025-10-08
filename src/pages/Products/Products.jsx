@@ -1,34 +1,27 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Space, Popconfirm, message } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Button, Table, Space, Popconfirm, Avatar, Input, Select, Row, Col} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, ShopOutlined } from "@ant-design/icons";
 import { useInfoContext } from "../../context/infoContext";
 import axios from "axios";
 import { getReq } from "../../services/getRequeset";
+import PreviewDrawer from "../../components/UI/PreviewDrawer";
+
 
 const Products = () => {
-  const navigate = useNavigate();
-  const { addTab } = useInfoContext();
+  const { addTab, error, success } = useInfoContext();
+  const { Option } = Select;
 
   const [filters, setFilters] = useState({
-    productName: "  ",
+    productName: "",
     filialId: "",
     firmId: "",
     categoryId: "",
   });
 
-  const [data, setData] = useState([{
-  "productName": "Non",
-  "count": 10,
-  "takingPrice": 4500.5,
-  "sellingPrice": 5500,
-  "promotion": 10,
-  "filialId": "filialId",
-  "firmId": "firmaId",
-  "categoryId": "Kategoriya"
-}]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [preview, setPreview] = useState(null);
+  const [open, setOpen] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -49,11 +42,14 @@ const Products = () => {
         limit,
       });
 
-      console.log("YYYYYYY",params);
+      // console.log("YYYYYYY",params);
+      console.log(`products?${params.toString()}`);
       
 
-      const {data} = await getReq(`products?${params.toString()}`);      
-      // setData(data.data);
+      const {data} = await getReq(`products?${params.toString()}`); 
+      console.log(data);
+           
+      setData(data.data);
       setPagination({
         current: data.page,
         pageSize: data.limit,
@@ -61,55 +57,108 @@ const Products = () => {
       });
     } catch (err) {
       console.error("Mahsulotlarni olishda xatolik:", err);
-      message.error("Ma’lumotlarni olishda xatolik!");
+      error("Ma’lumotlarni olishda xatolik!");
     } finally {
       setLoading(false);
     }
   };
-
+    
   // 🔹 Sahifa yuklanganda
   useEffect(() => {
     fetchProducts({ page: 1, limit: pagination.pageSize });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+  const [filialList, setFilialList] = useState([]);
+const [firmList, setFirmList] = useState([]);
+const [categoryList, setCategoryList] = useState([]);
+const { currentUser } = useInfoContext(); // agar mavjud bo‘lsa
+
+useEffect(() => {
+  const fetchFiltersData = async () => {
+    try {
+      const [filial, firma, categories] = await Promise.all([
+        getReq("filial"),
+        getReq("firma"),
+        getReq("categories"),
+      ]);
+      setFilialList(filial.data.data);
+      setFirmList(firma.data.data);
+      setCategoryList(categories.data.data);
+
+      // 🔸 Default filial id
+      setFilters((prev) => ({ ...prev, filialId: currentUser?.filialId || "" }));
+    } catch (err) {
+      error("Filter ma’lumotlarini olishda xatolik!");
+    }
+  };
+  fetchFiltersData();
+}, []);
+
   // 🔹 O‘chirish
   const handleDelete = async (id) => {
     try {
       await axios.delete(`/products/${id}`);
-      message.success("Mahsulot o‘chirildi!");
+      success("Mahsulot o‘chirildi!");
       fetchProducts({ page: pagination.current, limit: pagination.pageSize });
     } catch (err) {
-      message.error("O‘chirishda xatolik!");
+      error("O‘chirishda xatolik!");
     }
   };
 
   const columns = [
-    { title: "Mahsulot nomi", dataIndex: "productName" },
-    { title: "Soni", dataIndex: "count" },
+    {
+      title: "Rasmi",
+      dataIndex: "image",
+      render: (image) => (
+        image ? (
+          <img
+            src={`${import.meta.env.VITE_SERVER_URL}${image}`}
+            alt="Mahsulot rasmi"
+            style={{ width: 60, height: 50, objectFit: "contain", borderRadius: 8 }}
+          />
+        ) : (
+          <Avatar size={45} style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}
+          shape="square" 
+          icon={<ShopOutlined />} />
+        )
+      ),
+    },
+    { title: "Nomi", dataIndex: "productName" },
     { title: "Olish narxi", dataIndex: "takingPrice" },
     { title: "Sotish narxi", dataIndex: "sellingPrice" },
-    { title: "Chegirma", dataIndex: "promotion" },
-    { title: "Firma", dataIndex: "firmId" },
-    { title: "Filial", dataIndex: "filialId" },
-    { title: "Kategoriya", dataIndex: "categoryId" },
+    { title: "Valyuta", dataIndex: "valyuta" },
+    { title: "Sotish foizi", dataIndex: "sellingPercentage", render: (sellingPercentage) => {
+      return `${sellingPercentage}%`
+    }},
+    { title: "Chegirma (%)", dataIndex: "promotion", render: (promotion) => {
+      return `${promotion}%`
+    } },
+    { title: "Soni", dataIndex: "count" },
+    { title: "Qo'shilgan sanasi", dataIndex: "date",  render: (date) => {
+      if (!date) return "----";
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}.${month}.${year}`; // masalan: 07.10.2025
+    }},
+    { title: `QR kodi`, dataIndex: "Qrcode" },
     {
       title: "Amallar",
       render: (_, record) => (
         <Space>
-          {/* Ko‘rish */}
           <Button
             icon={<EyeOutlined />}
-            onClick={() => addTab("Mahsulot", `/products/${record.id}`, "EyeOutlined")}
+            onClick={(e) => {setOpen(true); setPreview(record)}}
           />
-
-          {/* Tahrirlash */}
           <Button
             icon={<EditOutlined />}
-            onClick={() => addTab("Tahrirlash", `/products/edit/${record.id}`, "EditOutlined")}
+            onClick={() =>
+              addTab("Tahrirlash", `/products/edit/${record.id}`, "EditOutlined")
+            }
           />
-
-          {/* O‘chirish */}
           <Popconfirm
             title="Mahsulotni o‘chirishni xohlaysizmi?"
             onConfirm={() => handleDelete(record.id)}
@@ -120,6 +169,7 @@ const Products = () => {
       ),
     },
   ];
+
 
   return (
     <div>
@@ -132,6 +182,74 @@ const Products = () => {
       >
         Mahsulot qo‘shish
       </Button>
+
+      {/* 🔍 Filtrlar paneli */}
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={12} md={6}>
+          <Input.Search
+            placeholder="Mahsulot nomi bo‘yicha qidirish"
+            value={filters.productName}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, productName: e.target.value }))
+            }
+            onSearch={() => fetchProducts({ page: 1, limit: pagination.pageSize })}
+            allowClear
+          />
+        </Col>
+
+        <Col xs={24} sm={12} md={6}>
+          <Select
+            placeholder="Filialni bo'yicha"
+            style={{ width: "100%" }}
+            value={filters.filialId}
+            onChange={(value) =>
+              setFilters((prev) => ({ ...prev, filialId: value }))
+            }
+            allowClear
+          >
+            {filialList.map((filial) => (
+              <Option key={filial.id} value={filial.id}>
+                {filial.name}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+
+        <Col xs={24} sm={12} md={6}>
+          <Select
+            placeholder="Firma bo'yicha"
+            style={{ width: "100%" }}
+            value={filters.firmId}
+            onChange={(value) => setFilters((prev) => ({ ...prev, firmId: value }))}
+            allowClear
+          >
+            {firmList.map((firm) => (
+              <Option key={firm.id} value={firm.id}>
+                {firm.name}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+
+        <Col xs={24} sm={12} md={6}>
+          <Select
+            placeholder="Kategoriya bo'yicha"
+            style={{ width: "100%" }}
+            value={filters.categoryId}
+            onChange={(value) =>
+              setFilters((prev) => ({ ...prev, categoryId: value }))
+            }
+            allowClear
+          >
+            {categoryList.map((cat) => (
+              <Option key={cat.id} value={cat.id}>
+                {cat.name}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+      </Row>
+
 
       {/* Jadval */}
       <Table
@@ -149,6 +267,7 @@ const Products = () => {
           },
         }}
       />
+      <PreviewDrawer open={open} onClose={() => setOpen(false)} preview={preview}/>
     </div>
   );
 };

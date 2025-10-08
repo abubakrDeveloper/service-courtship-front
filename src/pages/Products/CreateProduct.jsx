@@ -5,30 +5,38 @@ import { getReq } from "../../services/getRequeset";
 import axios from "axios";
 import PaginatedSelect from "../../components/UI/PaginatedSelect";
 import ImageUpload from "../../components/UI/ImageUpload";
+import { updateReq } from "../../services/putRequest";
+import { addReq } from "../../services/addRequest";
+import { useInfoContext } from "../../context/infoContext";
+
 const CreateProduct = () => {
+  const {removeTab, success, error} = useInfoContext()
   const [form] = Form.useForm();
   const { id } = useParams(); // agar id bo‘lsa → update rejim
   const navigate = useNavigate();
-  
-  const [fileList, setFileList] = useState([]);
+
+  const [fileUrl, setFileUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  console.log(id);
-  
-  // 🔹 Update rejimida mahsulotni olish
+  // 🔹 Mahsulotni olish (update rejimi uchun)
   const fetchProduct = async () => {
     try {
       const res = await getReq(`products/${id}`);
       const product = res.data;
+
       form.setFieldsValue({
         productName: product.productName,
         count: product.count,
         takingPrice: product.takingPrice,
         sellingPrice: product.sellingPrice,
         promotion: product.promotion,
+        sellingPercentage: product.sellingPercentage,
         filialId: product.filialId,
         firmId: product.firmId,
         categoryId: product.categoryId,
+        valyuta: product.valyuta || "UZS",
+        image: product.image,
+        Qrcode: product.Qrcode,
       });
     } catch (err) {
       message.error("Mahsulotni olishda xatolik!");
@@ -36,47 +44,56 @@ const CreateProduct = () => {
   };
 
   useEffect(() => {
-    if(id){
+    if (id) {
       fetchProduct();
+    } else {
+      form.setFieldsValue({ valyuta: "UZS" });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // 🔹 Submit
   const onFinish = async (values) => {
-    return console.log(values);
-    
     try {
       setLoading(true);
+
+      const payload = {
+        productName: values.productName || values.name, // nom moslash
+        count: Number(values.count),
+        takingPrice: Number(values.takingPrice || values.buyPrice),
+        sellingPrice: Number(values.sellingPrice),
+        promotion: Number(values.promotion) || 0,
+        sellingPercentage: Number(values.sellingPercentage) || 0,
+        filialId: values.filialId,
+        valyuta: values.valyuta || "UZS",
+        image: fileUrl || "", // /uploads/...jpg
+        firmId: values.firmId,
+        categoryId: values.categoryId,
+        Qrcode: values.Qrcode || "",
+      };
+
+      console.log("Yuborilayotgan payload:", payload);
+
       if (id) {
-        // Update
-        await axios.put(`/products/${id}`, values);
-        message.success("Mahsulot yangilandi!");
-      } else {
-        // Create
-        const res = await axios.post("/products", values);
+        const res = await updateReq(id, payload, "products");
         console.log(res);
         
-        message.success("Mahsulot qo‘shildi!");
+        success("Mahsulot yangilandi!");
+      } else {
+        const res = await addReq(payload, "products");
+        console.log(res);
+        
+        success("Mahsulot qo‘shildi!");
       }
-      navigate("/products"); // qaytarish
+
+      removeTab('/products/new')
     } catch (err) {
-      console.log(err);
-      
-      message.error("Saqlashda xatolik!");
+      console.error("❌ Xatolik:", err.response?.data || err);
+      error("Saqlashda xatolik!");
     } finally {
       setLoading(false);
     }
   };
 
-  const priceSelect = (
-    <Form.Item name="suffix" noStyle>
-      <Select style={{ width: 70 }}>
-        <Select.Option value="USD">USD</Select.Option>
-        <Select.Option value="UZS">UZS</Select.Option>
-      </Select>
-    </Form.Item>
-  );
 
   return (
     <Form
@@ -85,19 +102,26 @@ const CreateProduct = () => {
       onFinish={onFinish}
       className="md:flex gap-6 items-start"
     >
-     <div className="flex justify-center items-center w-full md:w-1/3">
-        <Form.Item label="Mahsulot rasmi" className="text-center">
-          <ImageUpload imageStyle='card' fileList={fileList} setFileList={setFileList} limit={1}/>
+      {/* Chapda — Rasm yuklash */}
+      <div className="flex justify-center items-center w-full md:w-1/3">
+        <Form.Item label="Mahsulot rasmi" className="text-center" name="image">
+          <ImageUpload
+            imageStyle="card"
+            fileUrl={fileUrl}
+            setFileUrl={setFileUrl}
+            limit={1}
+          />
         </Form.Item>
       </div>
-      {/* O‘ng tomonda inputlar */}
+
+      {/* O‘ngda — Ma’lumotlar */}
       <div className="w-full">
         <Form.Item
           name="productName"
           label="Mahsulot nomi"
           rules={[{ required: true, message: "Nomini kiriting" }]}
         >
-          <Input placeholder="Mahsulot nomi" />
+          <Input placeholder="Masalan: Non" />
         </Form.Item>
 
         <Form.Item
@@ -113,7 +137,18 @@ const CreateProduct = () => {
           label="Olish narxi"
           rules={[{ required: true, message: "Olish narxini kiriting" }]}
         >
-          <InputNumber addonAfter={priceSelect} min={0} style={{ width: "100%" }} />
+          <InputNumber
+            min={0}
+            addonAfter={
+              <Form.Item name="valyuta" noStyle>
+                <Select style={{ width: 80 }}>
+                  <Select.Option value="UZS">UZS</Select.Option>
+                  <Select.Option value="USD">USD</Select.Option>
+                </Select>
+              </Form.Item>
+            }
+            style={{ width: "100%" }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -121,17 +156,34 @@ const CreateProduct = () => {
           label="Sotish narxi"
           rules={[{ required: true, message: "Sotish narxini kiriting" }]}
         >
-          <InputNumber addonAfter={priceSelect} min={0} style={{ width: "100%" }} />
+          <InputNumber min={0}
+             addonAfter={
+              <Form.Item name="valyuta" noStyle>
+                <Select style={{ width: 80 }}>
+                  <Select.Option value="UZS">UZS</Select.Option>
+                  <Select.Option value="USD">USD</Select.Option>
+                </Select>
+              </Form.Item>
+            }
+          style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item name="promotion" label="Chegirma (%)">
           <InputNumber min={0} max={100} style={{ width: "100%" }} />
         </Form.Item>
 
+        <Form.Item name="sellingPercentage" label="Sotish foizi (%)">
+          <InputNumber min={0} max={100} style={{ width: "100%" }} />
+        </Form.Item>
+
+        <Form.Item name="Qrcode" label="QR kod">
+          <Input placeholder="Masalan: qwerty-12345" />
+        </Form.Item>
+
         <Form.Item
           name="filialId"
           label="Filial"
-          rules={[{ required: true, message: "Filial tanlang" }]}
+          rules={[{ required: true, message: "Filialni tanlang" }]}
         >
           <PaginatedSelect endpoint="filial" queryKey="name" placeholder="Filial tanlang" />
         </Form.Item>
@@ -139,17 +191,17 @@ const CreateProduct = () => {
         <Form.Item
           name="firmId"
           label="Firma"
-          rules={[{ required: true, message: "Firma tanlang" }]}
+          rules={[{ required: true, message: "Firmani tanlang" }]}
         >
           <PaginatedSelect endpoint="firma" queryKey="name" placeholder="Firma tanlang" />
         </Form.Item>
 
         <Form.Item
-          name="firmId"
-          label="Firma"
-          rules={[{ required: true, message: "Categoryani tanlang" }]}
+          name="categoryId"
+          label="Kategoriya"
+          rules={[{ required: true, message: "Kategoriyani tanlang" }]}
         >
-          <PaginatedSelect endpoint="categorys" queryKey="name" placeholder="Categoryani tanlang" />
+          <PaginatedSelect endpoint="categories" queryKey="name" placeholder="Kategoriya tanlang" />
         </Form.Item>
 
         <Form.Item>

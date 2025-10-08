@@ -8,8 +8,6 @@ export default function Register() {
 
   // Vite env o'zgaruvchisi
   // const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
-  const server_url = process.env.SERVER_URL;
-
   const onFinish = async (values) => {
     setLoading(true);
     console.log("Form values:", values);

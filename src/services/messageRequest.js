@@ -8,20 +8,20 @@ const API = axios.create({baseURL: serverURL});
 
 export const addMessage = (data) => {
     const token = localStorage.getItem("token");
-    return API.post('/api/message', data, {headers: {token, verificationtoken: accessUrl}})
+    return API.post('/message', data, {headers: {token, verificationtoken: accessUrl}})
 };
 
 export const getMessage = (chatId) => {
     const token = localStorage.getItem("token");
-    return API.get(`/api/message/${chatId}`, {headers: {token, verificationtoken: accessUrl}})
+    return API.get(`/message/${chatId}`, {headers: {token, verificationtoken: accessUrl}})
 };
 
 export const updateMessage = (messageId, data) => {
     const token = localStorage.getItem("token");
-    return API.put(`/api/message/${messageId}`, data, {headers: {token, verificationtoken: accessUrl}})
+    return API.put(`/message/${messageId}`, data, {headers: {token, verificationtoken: accessUrl}})
 };
 
 export const deleteMessage = (messageId) => {
     const token = localStorage.getItem("token");
-    return API.delete(`/api/message/${messageId}`, {headers: {token, verificationtoken: accessUrl}})
+    return API.delete(`/message/${messageId}`, {headers: {token, verificationtoken: accessUrl}})
 };

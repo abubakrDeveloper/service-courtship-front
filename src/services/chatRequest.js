@@ -12,10 +12,10 @@ export const userChats = () => {
 
 export const findChat = (firstId, secondId) => {
     const token = localStorage.getItem("token");
-    return API.get(`/api/chat/${firstId}/${secondId}`, {headers: {token, verificationtoken: accessUrl}})
+    return API.get(`/chat/${firstId}/${secondId}`, {headers: {token, verificationtoken: accessUrl}})
 };
 
 export const deleteChat = (chatId) => {
     const token = localStorage.getItem("token");
-    return API.delete(`/api/chat/${chatId}`, {headers: {token, verificationtoken: accessUrl}})
+    return API.delete(`/chat/${chatId}`, {headers: {token, verificationtoken: accessUrl}})
 };
