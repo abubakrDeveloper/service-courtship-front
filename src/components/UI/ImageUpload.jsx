@@ -1,71 +1,76 @@
 import { useEffect, useState } from "react";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Upload, Image } from "antd";
+import { PlusOutlined, LoadingOutlined, CloudUploadOutlined } from "@ant-design/icons";
+import { Upload, Image, message } from "antd";
 import ImgCrop from "antd-img-crop";
 import { addReq } from "../../services/addRequest";
 import { deleteReq } from "../../services/deleteRequest";
-import { useShopStore } from "../../../store/useShopStore";
+import { useShopStore } from "../../store/useShopStore";
 
-const ImageUpload = ({ imageStyle, fileUrl, setFileUrl, limit }) => {
-  const { images, addImage, removeImage } = useShopStore();
+const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1 }) => {
+  const { images, addImage, removeImage, productList } = useShopStore();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const handlePreview = () => {
+    if (!fileUrl) return;
     setPreviewImage(`${import.meta.env.VITE_SERVER_URL}${fileUrl}`);
     setPreviewOpen(true);
   };
 
+  // ✅ Yuklash
   const customUpload = async ({ file, onSuccess, onError }) => {
     try {
       setUploading(true);
       const formData = new FormData();
       formData.append("image", file);
+
       const { data } = await addReq(formData, "files/upload");
-      const uploadedPath = data?.path; 
+      const uploadedPath = data?.path;
+
       if (uploadedPath) {
-        addImage(uploadedPath);
+        addImage(uploadedPath); // 🔥 store ga saqlaymiz
         setFileUrl(uploadedPath);
+        message.success("Rasm muvaffaqiyatli yuklandi!");
       }
+
       onSuccess("ok");
     } catch (err) {
+      message.error("Rasm yuklashda xatolik!");
       onError(err);
     } finally {
       setUploading(false);
     }
   };
+
+  useEffect(() => {
+  if (fileUrl && !images.includes(fileUrl)) {
+    addImage(fileUrl);
+  }
+}, [fileUrl]);
+
   const handleRemove = async () => {
     if (!fileUrl) return false;
-    removeImage(fileUrl)
+
+    // ✅ Agar bu rasm productList ichida ishlatilayotgan bo‘lsa, o‘chirib bo‘lmaydi
+    const usedInList = productList.some(p => p.image === fileUrl);
+    if (usedInList) {
+      message.warning("Bu rasm mahsulot ro‘yxatida ishlatilayapti!");
+      return false;
+    }
+
     const filename = fileUrl.split("/").pop();
     try {
       await deleteReq(filename, "files/delete");
+      removeImage(fileUrl);
       setFileUrl("");
+      message.success("Rasm o‘chirildi");
       return true;
     } catch (err) {
+      message.error("Rasmni o‘chirishda xatolik!");
       return false;
     }
   };
-
-  useEffect(() => {
-    const beforeUnload = async (e) => {
-      if (fileUrl) {
-        e.preventDefault();
-        e.returnValue = "Rasm hali saqlanmagan, o‘chirmoqchimisiz?";
-        const confirmed = window.confirm(
-          "Rasm hali saqlanmagan, o‘chirmoqchimisiz?"
-        );
-        if (confirmed) {
-          const filename = fileUrl.split("/").pop();
-          await deleteReq(filename, "files/delete");
-        }
-      }
-    };
-    window.addEventListener("beforeunload", beforeUnload);
-    return () => window.removeEventListener("beforeunload", beforeUnload);
-  }, [fileUrl]);
-
   const uploadButton = (
     <button
       style={{
@@ -77,13 +82,9 @@ const ImageUpload = ({ imageStyle, fileUrl, setFileUrl, limit }) => {
       }}
       type="button"
     >
-      {uploading ? (
-        <LoadingOutlined style={{ fontSize: 24 }} />
-      ) : (
-        <PlusOutlined />
-      )}
+      {uploading ? <LoadingOutlined style={{ fontSize: 24 }} /> : <CloudUploadOutlined style={{ fontSize: 24 }}/>}
       <div style={{ marginTop: 8 }}>
-        {uploading ? "Yuklanmoqda..." : "Upload"}
+        {uploading ? "Yuklanmoqda..." : "Rasm tanlash"}
       </div>
     </button>
   );
@@ -93,13 +94,24 @@ const ImageUpload = ({ imageStyle, fileUrl, setFileUrl, limit }) => {
       <ImgCrop rotationSlider aspect={1} modalTitle="Rasmni yuklash" modalOk="Yuklash" modalCancel="Bekor qilish">
         <Upload
           listType={`picture-${imageStyle}`}
-          fileUrl={fileUrl}
+          fileList={
+            fileUrl
+              ? [
+                  {
+                    uid: "-1",
+                    name: "image.png",
+                    status: "done",
+                    url: `${import.meta.env.VITE_SERVER_URL}${fileUrl}`,
+                  },
+                ]
+              : []
+          }
+          customRequest={customUpload}
           onPreview={handlePreview}
           onRemove={handleRemove}
-          customRequest={customUpload}
           showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
         >
-          {fileUrl.length >= limit ? null : uploadButton}
+          {fileUrl ? null : uploadButton}
         </Upload>
       </ImgCrop>
 
@@ -109,8 +121,7 @@ const ImageUpload = ({ imageStyle, fileUrl, setFileUrl, limit }) => {
           preview={{
             visible: previewOpen,
             onVisibleChange: (visible) => setPreviewOpen(visible),
-            afterOpenChange: (visible) =>
-              !visible && setPreviewImage(""),
+            afterOpenChange: (visible) => !visible && setPreviewImage(""),
           }}
           src={previewImage}
         />

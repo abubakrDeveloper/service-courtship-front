@@ -5,15 +5,15 @@ import { useInfoContext } from "../../context/infoContext";
 import axios from "axios";
 import { getReq } from "../../services/getRequeset";
 import PreviewDrawer from "../../components/UI/PreviewDrawer";
+import { deleteReq } from "../../services/deleteRequest";
+import PaginatedSelect from "../../components/UI/PaginatedSelect";
 
 
 const Products = () => {
-  const { addTab, error, success } = useInfoContext();
-  const { Option } = Select;
-
+  const { addTab, error, success, currentUser } = useInfoContext();
   const [filters, setFilters] = useState({
     productName: "",
-    filialId: "",
+    filialId: currentUser.filialId || "",
     firmId: "",
     categoryId: "",
   });
@@ -63,43 +63,15 @@ const Products = () => {
     }
   };
     
-  // 🔹 Sahifa yuklanganda
   useEffect(() => {
     fetchProducts({ page: 1, limit: pagination.pageSize });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filters]);
 
-
-  const [filialList, setFilialList] = useState([]);
-const [firmList, setFirmList] = useState([]);
-const [categoryList, setCategoryList] = useState([]);
-const { currentUser } = useInfoContext(); // agar mavjud bo‘lsa
-
-useEffect(() => {
-  const fetchFiltersData = async () => {
-    try {
-      const [filial, firma, categories] = await Promise.all([
-        getReq("filial"),
-        getReq("firma"),
-        getReq("categories"),
-      ]);
-      setFilialList(filial.data.data);
-      setFirmList(firma.data.data);
-      setCategoryList(categories.data.data);
-
-      // 🔸 Default filial id
-      setFilters((prev) => ({ ...prev, filialId: currentUser?.filialId || "" }));
-    } catch (err) {
-      error("Filter ma’lumotlarini olishda xatolik!");
-    }
-  };
-  fetchFiltersData();
-}, []);
 
   // 🔹 O‘chirish
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/products/${id}`);
+      await deleteReq(id, `products`);
       success("Mahsulot o‘chirildi!");
       fetchProducts({ page: pagination.current, limit: pagination.pageSize });
     } catch (err) {
@@ -169,7 +141,8 @@ useEffect(() => {
       ),
     },
   ];
-
+  console.log(filters);
+  
 
   return (
     <div>
@@ -178,7 +151,7 @@ useEffect(() => {
         type="primary"
         icon={<PlusOutlined />}
         onClick={() => addTab("Mahsulot qo‘shish", "/products/new", "PlusOutlined")}
-        style={{ marginBottom: 16 }}
+        style={{marginBottom: "16px"}}
       >
         Mahsulot qo‘shish
       </Button>
@@ -198,57 +171,44 @@ useEffect(() => {
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <Select
-            placeholder="Filialni bo'yicha"
-            style={{ width: "100%" }}
+          <PaginatedSelect
+            endpoint="filial"
+            queryKey="name"
+            placeholder="Filial bo‘yicha qidirish"
             value={filters.filialId}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, filialId: value }))
-            }
-            allowClear
-          >
-            {filialList.map((filial) => (
-              <Option key={filial.id} value={filial.id}>
-                {filial.name}
-              </Option>
-            ))}
-          </Select>
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, filialId: value }));
+              fetchProducts({ page: 1, limit: pagination.pageSize }); // 🔄 avtomatik filter
+            }}
+          />
         </Col>
-
         <Col xs={24} sm={12} md={6}>
-          <Select
-            placeholder="Firma bo'yicha"
-            style={{ width: "100%" }}
+          <PaginatedSelect
+            endpoint="firma"
+            queryKey="name"
+            placeholder="Firma bo‘yicha qidirish"
             value={filters.firmId}
-            onChange={(value) => setFilters((prev) => ({ ...prev, firmId: value }))}
-            allowClear
-          >
-            {firmList.map((firm) => (
-              <Option key={firm.id} value={firm.id}>
-                {firm.name}
-              </Option>
-            ))}
-          </Select>
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, firmId: value }));
+              fetchProducts({ page: 1, limit: pagination.pageSize }); // 🔄 avtomatik filter
+            }}
+          />
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <Select
-            placeholder="Kategoriya bo'yicha"
-            style={{ width: "100%" }}
+          <PaginatedSelect
+            endpoint="categories"
+            queryKey="name"
+            placeholder="Kategoriya bo‘yicha qidirish"
             value={filters.categoryId}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, categoryId: value }))
-            }
-            allowClear
-          >
-            {categoryList.map((cat) => (
-              <Option key={cat.id} value={cat.id}>
-                {cat.name}
-              </Option>
-            ))}
-          </Select>
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, categoryId: value }));
+              fetchProducts({ page: 1, limit: pagination.pageSize }); // 🔄 avtomatik filter
+            }}
+          />
         </Col>
       </Row>
+
 
 
       {/* Jadval */}

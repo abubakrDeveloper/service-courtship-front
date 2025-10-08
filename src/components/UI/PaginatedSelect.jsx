@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Select, Spin, message } from "antd";
 import { getReq } from "../../services/getRequeset";
+import { useInfoContext } from "../../context/infoContext";
 
 const PaginatedSelect = ({
   endpoint,       // masalan: "filial" yoki "firma"
@@ -16,6 +17,7 @@ const PaginatedSelect = ({
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const { currentUser } = useInfoContext()  
 
   const fetchData = async (pageNum = 1, searchText = "") => {
     try {
@@ -27,7 +29,7 @@ const PaginatedSelect = ({
         ...(searchText ? { [queryKey]: searchText } : {}),
       });
 
-      const res = await getReq(`${endpoint}?${params.toString()}`);
+      const res = await getReq(`${endpoint}?${params.toString()}${endpoint === "filial" && `&magazinId=${currentUser.magazinId}`}`);
       const newData = res.data.data || [];
 
       setOptions(prev =>
@@ -35,6 +37,8 @@ const PaginatedSelect = ({
       );
       setTotal(res.data.totalCount || 0);
     } catch (err) {
+      console.log(err);
+      
       message.error("Ma’lumotlarni olishda xatolik!");
     } finally {
       setLoading(false);
