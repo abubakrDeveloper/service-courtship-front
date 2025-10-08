@@ -18,7 +18,7 @@ const Profile = () => {
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState(user.image || "");
   
   const removeImage = async (path) => {
     const filename = path.split("/").pop();

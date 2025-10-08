@@ -210,7 +210,7 @@ const handleAddToList = async () => {
 
         {/* O‘ngda — Ma’lumotlar */}
         <div className="w-full">
-           <div className="flex items-center justify-center w-full">
+           <div className="flex items-center justify-center w-full gap-5">
             <Form.Item label="Mahsulot rasmi" className="mx-auto w-1/5" name="image">
               <ImageUpload
                 required
@@ -313,12 +313,12 @@ const handleAddToList = async () => {
           </Form.Item>
 
           <div className="flex gap-3">
-            <Button type={id ? "primary" : "text"} icon={id ? <EditOutlined /> : <PlusOutlined />} onClick={handleAddToList}>
+            {!id && <Button type="primary" disabled={productList.length <= 0} onClick={handleSubmit} loading={loading}>
+              Barchasini Saqlash
+            </Button>}
+            <Button type={id ? "primary" : "default"} icon={id ? <EditOutlined /> : <PlusOutlined />} onClick={handleAddToList}>
               {id ? "Yangilash" : "Listga qo‘shish"}
             </Button>
-            {!id && <Button type="primary" onClick={handleSubmit} loading={loading}>
-              Saqlash
-            </Button>}
           </div>
         </div>
       </Form>
