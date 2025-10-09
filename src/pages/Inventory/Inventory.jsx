@@ -92,7 +92,7 @@ export default function InventoryDashboard() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 w-full">
                 <div className="relative w-full">
-                  <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Mahsulot, SKU yoki joy bo'yicha qidirish..." className="w-full border rounded-xl px-4 py-3 focus:outline-none" />
+                  <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Tavar, SKU yoki joy bo'yicha qidirish..." className="w-full border rounded-xl px-4 py-3 focus:outline-none" />
                   <div className="absolute right-3 top-3 opacity-60"><Search size={16} /></div>
                 </div>
               </div>

@@ -5,35 +5,26 @@ import {
   Select,
   Button,
   InputNumber,
-  message,
   Card,
   Row,
   Col,
   Divider,
   Popconfirm,
+  Avatar,
 } from "antd";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getReq } from "../../services/getRequeset";
 import { updateReq } from "../../services/putRequest";
 import { addReq } from "../../services/addRequest";
 import { useInfoContext } from "../../context/infoContext";
 import PaginatedSelect from "../../components/UI/PaginatedSelect";
 import ImageUpload from "../../components/UI/ImageUpload";
-import { PlusOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { useShopStore } from "../../store/useShopStore";
+import { PlusOutlined, DeleteOutlined, EditOutlined, ShopOutlined, DatabaseOutlined } from "@ant-design/icons";
+import { useProductStore } from "../../store/useProductStore";
 
 const CreateProduct = () => {
-  const { removeTab, success, error, currentUser, activeKey} = useInfoContext();
-  const {
-    productList,
-    addProduct,
-    removeProduct,
-    setProductList,
-    formValues,
-    setFormValues,
-    clearFormValues,
-  } = useShopStore();
-
+  const { removeTab, addTab, success, error, currentUser, activeKey, warning} = useInfoContext();
+  const { itemList, addProduct, removeProduct, setProductList, formValues, setFormValues, clearFormValues, editingIndex, setEditingIndex, updateProduct } = useProductStore();
   const [form] = Form.useForm();
   const { id } = useParams();
 
@@ -42,20 +33,36 @@ const CreateProduct = () => {
 
   // ✅ Form qiymatlarini local store’dan yuklash
   useEffect(() => {
-    if (Object.keys(formValues).length) {
-      form.setFieldsValue(formValues);
-      if (formValues.image) setFileUrl(formValues.image);
-    } else {
-      form.setFieldsValue({ valyuta: "UZS" });
+    if (id) return; // update rejimda bo'lsa fetch haj qiladi
+
+    // ✅ faqat yangi product qo‘shish rejimi
+    if (!editingIndex) {
+      form.resetFields();
+      form.setFieldsValue({
+        valyuta: "UZS",
+        filialId: currentUser?.filialId
+      });
+      setFileUrl("");
     }
-  }, []);
+  }, [activeKey]); // tab qayta ochilganda reset
+
+
 
   // ✅ Form o‘zgarsa — store ga yozish
   const handleFormChange = (_, allValues) => {
-    setFormValues({ ...allValues, image: fileUrl });
+    // ❗️ image qo‘shilmaydi, faqat input qiymatlari
+    setFormValues(allValues);
   };
 
-  // ✅ Mahsulotni olish (update rejimi uchun)
+  // Listdagi tavarni o'zgartirish
+  const handleEdit = (index) => {
+    const product = itemList[index];
+    form.setFieldsValue(product);
+    setFileUrl(product.image || "");
+    setEditingIndex(index);
+  };
+
+  // ✅ Tavarni olish (update rejimi uchun)
   const fetchProduct = async () => {
     try {
       const res = await getReq(`products/${id}`);
@@ -65,93 +72,71 @@ const CreateProduct = () => {
       form.setFieldsValue(product);
       setFileUrl(product.image || "");
     } catch {
-      message.error("Mahsulotni olishda xatolik!");
+      error("Tavarni olishda xatolik!");
     }
   };
-  console.log(productList);
+  console.log(itemList);
   
-  useEffect(() => {
-    if (!fileUrl && formValues?.image) {
-      setFileUrl(formValues.image);
-    }
-  }, [formValues.image]);
-
   useEffect(() => {
     if (id) fetchProduct();
   }, [id]);
 
-  // ✅ Listga qo‘shish
   // ✅ Listga qo‘shish yoki yangilash
-const handleAddToList = async () => {
-  const values = await form.validateFields();
-  const newProduct = {
-    ...values,
-    image: fileUrl,
-    takingPrice: Number(values.takingPrice),
-    sellingPrice: Number(values.sellingPrice),
-    valyuta: values.valyuta || "UZS",
-  };
-  console.log(newProduct);
-  
-  if (id) {
-    // ✳️ Tahrirlash rejimi
-    try {
-      setLoading(true);
+  const handleAddToList = async () => {
+    if (!fileUrl) return warning("Rasm yuklanmagan");
+    const values = await form.validateFields();
+    const newProduct = {
+      ...values,
+      valyuta: values.valyuta || "UZS",
+      image: fileUrl, // rasm
+    };
+
+    if (id) {
+      // UPDATE mode (serverdan kelgan)
       await updateReq(id, newProduct, "products");
-      success("Mahsulot yangilandi!");
-      removeTab(activeKey); // oynani yopish
-    } catch (err) {
-      console.error(err);
-      error("Yangilashda xatolik!");
-    } finally {
-      setLoading(false);
+      success("Tavar yangilandi");
+      removeTab(activeKey);
+      return;
     }
-  } else {
-    // ✳️ Yangi mahsulot rejimi — listga qo‘shish
-    addProduct(newProduct);
+    
+    if (editingIndex !== null) {
+      updateProduct(editingIndex, newProduct);
+      setEditingIndex(null);
+    } else {
+      addProduct(newProduct);
+    }
 
-    // 🔄 formni tozalaymiz
-    form.resetFields();
-    form.setFieldsValue({ valyuta: "UZS" });
+    form.resetFields(); // reset
     setFileUrl("");
-    setFormValues({ valyuta: "UZS" });
-  }
-};
-
+    setFormValues({});
+    form.setFieldsValue({
+      valyuta: "UZS", // ✅ resetdan keyin qaytarib qo‘yish
+      filialId: currentUser?.filialId // ✅ default filial qayta chiqishi
+    });
+  };
 
   // ✅ Listdan o‘chirish
   const handleRemove = (index) => {removeProduct(index)};
 
   // ✅ Yuborish (bulk)
   const handleSubmit = async () => {
-    if (!productList.length) {
-      return message.warning("Kamida bitta mahsulot qo‘shing!");
+    if (!itemList.length) {
+      return warning("Kamida bitta tavar qo‘shing!");
     }
 
     try {
       setLoading(true);
+      // Yangi qo‘shish rejimi — har bir tavarni alohida yuboramiz
+      await Promise.all(
+        itemList.map(async (item) => {
+          await addReq(item, "products");
+        })
+      );
+      success("Barcha tavarlar qo‘shildi!");
 
-      if (id) {
-        // Yangilash rejimi — har bir mahsulotni update qilib chiqamiz
-        await Promise.all(
-          productList.map(async (item) => {
-            await updateReq(item._id, item, "products");
-          })
-        );
-        success("Mahsulotlar yangilandi!");
-      } else {
-        // Yangi qo‘shish rejimi — har bir mahsulotni alohida yuboramiz
-        await Promise.all(
-          productList.map(async (item) => {
-            await addReq(item, "products");
-          })
-        );
-        success("Barcha mahsulotlar qo‘shildi!");
-      }
-
-      // 🔄 Tozalash
       setProductList([]);
       clearFormValues();
+      addTab('Tovarlar', '/products', "OrderedListOutlined")
       removeTab(activeKey);
     } catch (err) {
       console.error(err);
@@ -171,35 +156,47 @@ const handleAddToList = async () => {
         className="md:flex gap-6 items-start"
       >
         {/* Chapda — Rasm */}
-        <div className="flex-col-reverse justify-center items-center w-1/2">
-         {productList.length > 0 && (
+        <div className="flex-col-reverse justify-center items-center md:w-1/2">
+         {itemList.length > 0 && (
           <>
-            <Divider>Jarayondagi mahsulotlar</Divider>
-            <Row gutter={[4, 4]}>
-              {productList.map((item, index) => (
-                <Col key={index} span={8}>
+            <div className="flex gap-3 w-full items-center justify-between mb-5">
+              <b className="md:text-lg">Jarayondagi tavarlar: <span style={{color: "blue"}}>{itemList.length}</span></b>
+              <Button type="primary" iconPosition="end" disabled={itemList.length <= 0} onClick={handleSubmit} loading={loading}>
+                Yuklash
+                <DatabaseOutlined />
+              </Button>
+            </div>
+            <Row gutter={[4, 4]} className="products_list">
+              {itemList.map((item, index) => (
+                <Col key={index}>
                   <Card
+                    style={{width: '100px'}}
+                    size="small"
                     title={item.productName}
                     extra={
-                      <Popconfirm
-                      title="Mahsulotni o‘chirishni xohlaysizmi?"
-                      onConfirm={() => handleRemove(index)}
-                      >
-                      <DeleteOutlined
-                          style={{ color: "red" }}
+                      <>
+                        <Popconfirm title="Tavarni o‘chirish?" onConfirm={() => handleRemove(index)}>
+                          <DeleteOutlined style={{ marginRight: 10, color: "red", cursor: "pointer" }} />
+                        </Popconfirm>
+                        <EditOutlined
+                          style={{color: "blue", cursor: "pointer" }}
+                          onClick={() => handleEdit(index)}
                         />
-                    </Popconfirm>
-                    }
-                    cover={
-                      item.image ? (
-                        <img
-                          src={`${import.meta.env.VITE_SERVER_URL}${item.image}`}
-                          alt={item.productName}
-                          style={{ height: 140, objectFit: "contain" }}
-                        />
-                      ) : null
+                      </>
                     }
                   >
+                  {
+                    item.image ? (
+                      <img
+                        className="w-full"
+                        src={`${import.meta.env.VITE_SERVER_URL}${item.image}`}
+                        alt={item.productName}
+                        style={{objectFit: "contain", width: '100%', height: '80px'}}
+                      />
+                    ) : (<Avatar className="w-full" style={{ backgroundColor: '#fde3cf', color: '#f56a00', fontSize: '30px', width: '100%', height: '80px', padding: "20px 0"}}
+                        shape="square" 
+                        icon={<ShopOutlined />} />)
+                    }
                   </Card>
                 </Col>
               ))}
@@ -210,10 +207,10 @@ const handleAddToList = async () => {
 
         {/* O‘ngda — Ma’lumotlar */}
         <div className="w-full">
-           <div className="flex items-center justify-center w-full gap-5">
-            <Form.Item label="Mahsulot rasmi" className="mx-auto w-1/5" name="image">
+           <div className="md:flex items-center justify-center w-full gap-5">
+            <Form.Item label="Tavar rasmi" className="mx-auto md:w-1/5" name="image">
               <ImageUpload
-                required
+                source="product"
                 imageStyle="card"
                 fileUrl={fileUrl}
                 setFileUrl={setFileUrl}
@@ -223,13 +220,13 @@ const handleAddToList = async () => {
             <div className="w-full">
               <Form.Item
               name="productName"
-              label="Mahsulot nomi"
+              label="Tavar nomi"
               rules={[{ required: true, message: "Nomini kiriting" }]}
               >
                 <Input placeholder="Nomi" />
               </Form.Item>
 
-              <Form.Item name="count" label="Mahsulot soni" rules={[{ required: true, message: "Sonini kiriting" }]}>
+              <Form.Item name="count" label="Tavar soni" rules={[{ required: true, message: "Sonini kiriting" }]}>
                 <InputNumber placeholder="0" min={0} style={{ width: "100%" }} />
               </Form.Item>
             </div>
@@ -237,7 +234,7 @@ const handleAddToList = async () => {
 
           <Form.Item
             name="takingPrice"
-            label="Mahsulot olish narxi"
+            label="Tavar olish narxi"
             rules={[{ required: true, message: "Olish narxini kiriting" }]}
           >
             <InputNumber
@@ -257,7 +254,7 @@ const handleAddToList = async () => {
 
           <Form.Item
             name="sellingPrice"
-            label="Mahsulot sotish narxi"
+            label="Tavar sotish narxi"
             rules={[{ required: true, message: "Sotish narxini kiriting" }]}
           >
             <InputNumber
@@ -275,19 +272,19 @@ const handleAddToList = async () => {
             />
           </Form.Item>
 
-          <Form.Item name="promotion" label="Mahsulot chegirma foizi (%)" rules={[{ required: true, message: "Chegirma foizini kiriting" }]}>
+          <Form.Item name="promotion" label="Tavar chegirma foizi (%)" rules={[{ required: true, message: "Chegirma foizini kiriting" }]}>
             <InputNumber placeholder="0" min={0} max={100} style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="sellingPercentage" label="Mahsulot sotish foizi (%)" rules={[{ required: true, message: "Sotish foizini kiriting" }]}>
+          <Form.Item name="sellingPercentage" label="Tavar sotish foizi (%)" rules={[{ required: true, message: "Sotish foizini kiriting" }]}>
             <InputNumber placeholder="0" min={0} max={100} style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="Qrcode" label="Mahsulot QR kodi" rules={[{ required: true, message: "Qr kodni kiriting" }]}>
+          <Form.Item name="Qrcode" label="Tavar QR kodi" rules={[{ required: true, message: "Qr kodni kiriting" }]}>
             <Input placeholder="1234567890123" />
           </Form.Item>
 
-          <Form.Item name="filialId" label="Mahsulot qo'shilishi kerak bo'lgan filial" rules={[{ required: true, message: "Filialni tanlang" }]}>
+          <Form.Item  initialValue={currentUser?.filialId} name="filialId" label="Tavar qo'shilishi kerak bo'lgan filial" rules={[{ required: true, message: "Filialni tanlang" }]}>
             <PaginatedSelect
               endpoint="filial"
               queryKey="name"
@@ -296,7 +293,7 @@ const handleAddToList = async () => {
             />
           </Form.Item>
 
-          <Form.Item name="firmId" label="Mahsulotga tegishli firma" rules={[{ required: true, message: "Firmani tanlang" }]}>
+          <Form.Item name="firmId" label="Tavarga tegishli firma" rules={[{ required: true, message: "Firmani tanlang" }]}>
             <PaginatedSelect
               endpoint="firma"
               queryKey="name"
@@ -304,7 +301,7 @@ const handleAddToList = async () => {
             />
           </Form.Item>
 
-          <Form.Item name="categoryId" label="Mahsulot kategoriyasi" rules={[{ required: true, message: "Kategoryasini tanlang" }]}>
+          <Form.Item name="categoryId" label="Tavar kategoriyasi" rules={[{ required: true, message: "Kategoryasini tanlang" }]}>
             <PaginatedSelect
               endpoint="categories"
               queryKey="name"
@@ -312,12 +309,9 @@ const handleAddToList = async () => {
             />
           </Form.Item>
 
-          <div className="flex gap-3">
-            {!id && <Button type="primary" disabled={productList.length <= 0} onClick={handleSubmit} loading={loading}>
-              Barchasini Saqlash
-            </Button>}
-            <Button type={id ? "primary" : "default"} icon={id ? <EditOutlined /> : <PlusOutlined />} onClick={handleAddToList}>
-              {id ? "Yangilash" : "Listga qo‘shish"}
+          <div>
+            <Button type="primary" icon={id || editingIndex ? <EditOutlined /> : <PlusOutlined />} onClick={handleAddToList}>
+              {id || editingIndex ? "O'zgarishni saqlash" : "Listga qo‘shish"}
             </Button>
           </div>
         </div>

@@ -30,13 +30,13 @@ const PreviewDrawer = ({ open, onClose, preview }) => {
 
   return (
     <Drawer
-      title={`Mahsulot haqida ma'lumot`}
+      title={`Tavar haqida ma'lumot`}
       width={550}
       onClose={onClose}
       open={open}
-      bodyStyle={{ paddingBottom: 40 }}
+      bodyStyle={{ padding: 0 }}
     >
-      {/* Mahsulot rasmi */}
+      {/* Tavar rasmi */}
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         {preview?.image ? (
           <Image
@@ -63,10 +63,13 @@ const PreviewDrawer = ({ open, onClose, preview }) => {
 
       <Divider />
 
-      {/* Mahsulot tafsilotlari */}
-      <Descriptions column={1} bordered size="middle" labelStyle={{ width: 160 }}>
-        {preview.productName && <Descriptions.Item label="Mahsulot nomi">
-          {copyableItem("Mahsulot nomi", preview.productName)}
+      {/* Tavar tafsilotlari */}
+      <Descriptions column={1} bordered size="middle" style={{ label: {width: 160}}}>
+        {preview.id && <Descriptions.Item label="Tavar ID">
+          {copyableItem("Firma ID", preview.id)}
+        </Descriptions.Item>}
+        {preview.productName && <Descriptions.Item label="Tavar nomi">
+          {copyableItem("Tavar nomi", preview.productName)}
         </Descriptions.Item>}
 
         {preview.count && <Descriptions.Item label="Soni">{preview.count}</Descriptions.Item>}

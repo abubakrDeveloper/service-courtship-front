@@ -68,6 +68,13 @@ body, .ant-layout{
 @media (min-width: 769px){
   .mobile-only{ display:none }
 }
+@media(max-width: 600px){
+  .products_list{
+    overflow-y: auto;
+    max-height: 300px;
+    height: 100%;
+  }
+}
 
 .button {
   cursor: pointer;

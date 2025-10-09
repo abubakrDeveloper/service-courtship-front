@@ -113,7 +113,7 @@ const Dashboard = () => {
         collapsed={window.innerWidth <= 500 || collapsed}
         onCollapse={(value) => setCollapsed(value)}
       >
-        <div className="profile-box" style={{ padding: 16, textAlign: "center", cursor: 'pointer'}} onClick={() => addTab("Profile", "/profile", "UserOutlined")}>
+        <div className="profile-box" style={{ padding: 16, textAlign: "center", cursor: 'pointer', height: window.innerWidth >= 500 ? "120px" : "85px"}} onClick={() => addTab("Profile", "/profile", "UserOutlined")}>
             {currentUser.image ? 
               <div className="profile_image flex items-center justify-center mx-auto" style={{borderRadius: "50%", overflow: 'hidden', maxWidth: "88px", maxHeight: '88px'}}>
                 <Image

@@ -1,22 +1,30 @@
 import { create } from "zustand";
 
-export const useShopStore = create((set) => ({
-  productList: [],
+export const useProductStore = create((set) => ({
+  itemList: [],
   formValues: {},
   images: [], // ⬅️ Yuklangan rasmlar ro‘yxati
+  editingIndex: null,
 
   addProduct: (product) =>
-    set((state) => ({ productList: [...state.productList, product] })),
+    set((state) => ({ itemList: [...state.itemList, product] })),
 
   removeProduct: (index) =>
     set((state) => ({
-      productList: state.productList.filter((_, i) => i !== index),
+      itemList: state.itemList.filter((_, i) => i !== index),
     })),
 
-  setProductList: (list) => set({ productList: list }),
+  setProductList: (list) => set({ itemList: list }),
 
   setFormValues: (values) => set({ formValues: values }),
   clearFormValues: () => set({ formValues: {} }),
+  setEditingIndex: (index) => set({ editingIndex: index }),
+  updateProduct: (index, updatedProduct) =>
+    set((state) => {
+      const newList = [...state.itemList];
+      newList[index] = updatedProduct;
+      return { itemList: newList };
+    }),
 
   // ✅ Rasm bilan ishlash
   addImage: (path) =>

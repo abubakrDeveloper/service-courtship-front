@@ -4,10 +4,11 @@ import { Upload, Image, message } from "antd";
 import ImgCrop from "antd-img-crop";
 import { addReq } from "../../services/addRequest";
 import { deleteReq } from "../../services/deleteRequest";
-import { useShopStore } from "../../store/useShopStore";
+import { useEmployeeStore } from "../../store/useEmployeeStore";
+import { useProductStore } from "../../store/useProductStore";
 
-const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1 }) => {
-  const { images, addImage, removeImage, productList } = useShopStore();
+const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1, source }) => {
+  const { images, addImage, removeImage, itemList } =  source === "employee" ? useEmployeeStore() : useProductStore();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -52,10 +53,10 @@ const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1 }) =>
   const handleRemove = async () => {
     if (!fileUrl) return false;
 
-    // ✅ Agar bu rasm productList ichida ishlatilayotgan bo‘lsa, o‘chirib bo‘lmaydi
-    const usedInList = productList.some(p => p.image === fileUrl);
+    // ✅ Agar bu rasm itemList ichida ishlatilayotgan bo‘lsa, o‘chirib bo‘lmaydi
+    const usedInList = itemList.some(p => p.image === fileUrl);
     if (usedInList) {
-      message.warning("Bu rasm mahsulot ro‘yxatida ishlatilayapti!");
+      message.warning("Bu rasm tavar ro‘yxatida ishlatilayapti!");
       return false;
     }
 

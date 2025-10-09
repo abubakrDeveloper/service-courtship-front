@@ -40,14 +40,9 @@ const Products = () => {
         ...(filters.categoryId && { categoryId: filters.categoryId }),
         page,
         limit,
-      });
-
-      // console.log("YYYYYYY",params);
-      console.log(`products?${params.toString()}`);
-      
+      });  
 
       const {data} = await getReq(`products?${params.toString()}`); 
-      console.log(data);
            
       setData(data.data);
       setPagination({
@@ -56,7 +51,7 @@ const Products = () => {
         total: data.total,
       });
     } catch (err) {
-      console.error("Mahsulotlarni olishda xatolik:", err);
+      console.error("Tavarlarni olishda xatolik:", err);
       error("Ma’lumotlarni olishda xatolik!");
     } finally {
       setLoading(false);
@@ -69,10 +64,14 @@ const Products = () => {
 
 
   // 🔹 O‘chirish
-  const handleDelete = async (id) => {
+  const handleDelete = async (data) => {
     try {
-      await deleteReq(id, `products`);
-      success("Mahsulot o‘chirildi!");
+      if(data.image){
+        const filename = data.image.split("/").pop();
+        await deleteReq(filename, "files/delete");
+      }
+      await deleteReq(data.id, `products`);
+      success("Tavar o‘chirildi!");
       fetchProducts({ page: pagination.current, limit: pagination.pageSize });
     } catch (err) {
       error("O‘chirishda xatolik!");
@@ -87,7 +86,7 @@ const Products = () => {
         image ? (
           <img
             src={`${import.meta.env.VITE_SERVER_URL}${image}`}
-            alt="Mahsulot rasmi"
+            alt="Tavar rasmi"
             style={{ width: 60, height: 50, objectFit: "contain", borderRadius: 8 }}
           />
         ) : (
@@ -132,17 +131,15 @@ const Products = () => {
             }
           />
           <Popconfirm
-            title="Mahsulotni o‘chirishni xohlaysizmi?"
-            onConfirm={() => handleDelete(record.id)}
+            title="Tavarni o‘chirishni xohlaysizmi?"
+            onConfirm={() => handleDelete(record)}
           >
             <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
     },
-  ];
-  console.log(filters);
-  
+  ];  
 
   return (
     <div>
@@ -150,17 +147,17 @@ const Products = () => {
       <Button
         type="primary"
         icon={<PlusOutlined />}
-        onClick={() => addTab("Mahsulot qo‘shish", "/products/new", "PlusOutlined")}
+        onClick={() => addTab("Tavar qo‘shish", "/products/new", "PlusOutlined")}
         style={{marginBottom: "16px"}}
       >
-        Mahsulot qo‘shish
+        Tavar qo‘shish
       </Button>
 
       {/* 🔍 Filtrlar paneli */}
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={6}>
           <Input.Search
-            placeholder="Mahsulot nomi bo‘yicha qidirish"
+            placeholder="Tavar nomi bo‘yicha qidirish"
             value={filters.productName}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, productName: e.target.value }))
