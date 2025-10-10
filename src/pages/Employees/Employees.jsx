@@ -42,8 +42,8 @@ const Employees = () => {
       });  
 
       const {data} = await getReq(`admins`); 
-           
-      setData(data.data);
+      const resList = data?.filter(i => i.id !== currentUser.id)
+      setData(resList);
       setPagination({
         current: data.page,
         pageSize: data.limit,
@@ -67,7 +67,7 @@ const Employees = () => {
     try {
       if(data.image){
         const filename = data.image.split("/").pop();
-        await deleteReq(filename, "files/delete");
+        deleteReq(filename, "files/delete");
       }
       await deleteReq(data.id, `admins`);
       success("Xodim o‘chirildi!");
@@ -99,7 +99,7 @@ const Employees = () => {
     { title: "Familiya", dataIndex: "lastName" },
     { title: "Lavozim", dataIndex: "role" },
     { title: "Telefon raqam", dataIndex: "phone" },
-    { title: "Qo'shilgan sanasi", dataIndex: "date",  render: (date) => {
+    { title: "Qo'shilgan sanasi", dataIndex: "createdAt",  render: (date) => {
       if (!date) return "----";
       const d = new Date(date);
       const day = String(d.getDate()).padStart(2, "0");
@@ -107,7 +107,6 @@ const Employees = () => {
       const year = d.getFullYear();
       return `${day}.${month}.${year}`; // masalan: 07.10.2025
     }},
-    { title: `QR kodi`, dataIndex: "Qrcode" },
     {
       title: "Amallar",
       render: (_, record) => (
@@ -119,7 +118,7 @@ const Employees = () => {
           <Button
             icon={<EditOutlined />}
             onClick={() =>
-              addTab("Tahrirlash", `/admins/edit/${record.id}`, "EditOutlined")
+              addTab("Tahrirlash", `/employees/edit/${record.id}`, "EditOutlined")
             }
           />
           <Popconfirm

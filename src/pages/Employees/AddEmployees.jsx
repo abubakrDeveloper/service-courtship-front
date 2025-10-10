@@ -24,24 +24,24 @@ import {
 import { useEmployeeStore } from "../../store/useEmployeeStore";
 import { addReq } from "../../services/addRequest";
 import { updateReq } from "../../services/putRequest";
+import { getReq } from "../../services/getRequeset";
+import { deleteReq } from "../../services/deleteRequest";
 
 const AddEmployees = () => {
   const {
     itemList,
+    formValues,
     addEmployee,
     removeEmployee,
     setEmployeeList,
-    formValues,
     setFormValues,
     clearFormValues,
     editingIndex,
     setEditingIndex,
-    updateEmployee,
     updateEmployeeInList
   } = useEmployeeStore();
 
-  const { removeTab, addTab, success, error, currentUser, activeKey, warning } =
-    useInfoContext();
+  const { removeTab, addTab, success, error, currentUser, activeKey, warning } = useInfoContext();
 
   const [form] = Form.useForm();
   const { id } = useParams();
@@ -51,6 +51,27 @@ const AddEmployees = () => {
 
   // ✅ Form change
   const handleFormChange = (_, allValues) => setFormValues(allValues);
+  console.log(formValues);
+  
+  useEffect(() => {
+    if (fileUrl) {
+      setFormValues(prev => ({ ...prev, image: fileUrl }));
+      form.setFieldsValue({ image: fileUrl }); // ✅ shu shart!
+    }
+  }, [fileUrl]);
+
+  useEffect(() => {
+    if (id) return; // update bo'lsa skip
+
+    form.setFieldsValue({
+      ...formValues,
+      filialId: currentUser?.filialId || null
+    });
+
+    // ✅ Rasmni qayta tiklash
+    if (formValues?.image) setFileUrl(formValues.image);
+  }, []); // ✅ activeKey NI OLIB TASHLAYMIZ
+
 
   // ✅ Edit
   const handleEdit = (index) => {
@@ -59,6 +80,26 @@ const AddEmployees = () => {
     setFileUrl(employee.image || "");
     setEditingIndex(index);
   };
+
+   const fetchEmployee = async () => {
+      try {
+        const {data} = await getReq(`admins/${id}`);
+        console.log(data);
+    
+        delete data.password
+        form.setFieldsValue(data);
+        setFileUrl(data.image || "");
+      } catch(err) {
+        console.log(err);
+        
+        error("Xodimni olishda xatolik!");
+      }
+    };
+    console.log(itemList);
+    
+    useEffect(() => {
+      if (id) fetchEmployee();
+    }, [id]);
 
   // ✅ qo‘shish
   const handleAddToList = async () => {
@@ -77,14 +118,23 @@ const AddEmployees = () => {
     }
 
     const newEmployee = {
-      firstname: values.firstname,
-      lastname: values.lastname,
+      firstName: values.firstName,
+      lastName: values.lastName,
       phone: values.phone,
       role: values.role,
       filialId: values.filialId,
       password: values.password,
       image: fileUrl,
     };
+
+    if (id) {
+      // UPDATE mode (serverdan kelgan)
+      await updateReq(id, newEmployee, "admins");
+      success("Xodim yangilandi");
+      addTab("Xodimlar", "/employees");
+      removeTab(activeKey);
+      return;
+    }
 
     if (editingIndex !== null) {
       updateEmployeeInList(editingIndex, newEmployee);
@@ -120,6 +170,42 @@ const AddEmployees = () => {
       setLoading(false);
     }
   };
+
+  // ✅ CreateProduct ichida qo‘shiladi
+  useEffect(() => {
+    if (fileUrl) {
+      setFormValues(prev => ({ ...prev, image: fileUrl }));
+    }
+  }, [fileUrl]);
+
+  useEffect(() => {
+    return () => {
+      const tempFiles = JSON.parse(localStorage.getItem("employeeFiles") || "[]");
+      if (!formValues?.image && tempFiles.length > 0) {
+        tempFiles.forEach(async (img) => {
+          const filename = img.split("/").pop();
+          await deleteReq(filename, "files/delete");
+        });
+        localStorage.removeItem("employeeFiles");
+      }
+    };
+  }, []);
+
+
+
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (itemList.length > 0 || fileUrl) {
+        e.preventDefault();
+        e.returnValue = "Sahifani yangilasangiz ma'lumotlar o‘chib ketadi!";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [itemList, fileUrl]);
+
 
   return (
     <div>
@@ -186,7 +272,7 @@ const AddEmployees = () => {
                             size={80}
                           />
                         )}
-                        <p>{item.lastname} {item.firstname}</p>
+                        <p>{item.lastName} {item.firstName}</p>
                       </Card>
                     </Col>
                   ))}
@@ -206,7 +292,7 @@ const AddEmployees = () => {
             </Form.Item>
 
             <Form.Item
-              name="firstname"
+              name="firstName"
               label="Ismi"
               rules={[{ required: true, message: "Ismni kiriting" }]}
             >
@@ -214,7 +300,7 @@ const AddEmployees = () => {
             </Form.Item>
 
             <Form.Item
-              name="lastname"
+              name="lastName"
               label="Familiyasi"
               rules={[{ required: true, message: "Familiyasini kiriting" }]}
             >
@@ -236,7 +322,7 @@ const AddEmployees = () => {
             >
               <Select placeholder="Lavozim tanlang">
                 <Select.Option value="ADMIN">Admin</Select.Option>
-                <Select.Option value="MANAGER">Manager</Select.Option>
+                <Select.Option value="VIEWERADMIN">Kuzatuvchi</Select.Option>
               </Select>
             </Form.Item>
 
@@ -259,7 +345,7 @@ const AddEmployees = () => {
               dependencies={["password"]}
               hasFeedback
               rules={[
-                { required: true, message: "Parolni tasdiqlang" },
+                { required: !id, message: "Parolni tasdiqlang" },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue("password") === value) {
@@ -275,12 +361,10 @@ const AddEmployees = () => {
 
             <Button
               type="primary"
-              icon={editingIndex !== null ? <EditOutlined /> : <PlusOutlined />}
+              icon={id || editingIndex ? <EditOutlined /> : <PlusOutlined />}
               onClick={handleAddToList}
             >
-              {editingIndex !== null
-                ? "O'zgarishni saqlash"
-                : "Listga qo‘shish"}
+              {id || editingIndex ? "O'zgarishni saqlash" : "Listga qo‘shish"}
             </Button>
           </div>
         </div>

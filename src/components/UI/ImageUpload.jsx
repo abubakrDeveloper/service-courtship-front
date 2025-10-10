@@ -68,6 +68,14 @@ const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1, sour
       message.success("Rasm o‘chirildi");
       return true;
     } catch (err) {
+      if(err.status == 404){
+        console.log("Rasm yo'q");
+        removeImage(fileUrl);
+        setFileUrl("");
+        message.success("Rasm o‘chirildi");
+        return true;
+        
+      }
       message.error("Rasmni o‘chirishda xatolik!");
       return false;
     }
@@ -89,6 +97,14 @@ const ImageUpload = ({ imageStyle = "card", fileUrl, setFileUrl, limit = 1, sour
       </div>
     </button>
   );
+
+  useEffect(() => {
+    if (fileUrl) {
+      let tempFiles = source === "employee" ? JSON.parse(localStorage.getItem("employeeFiles") || "[]") : JSON.parse(localStorage.getItem("productFiles") || "[]");
+      tempFiles.push(fileUrl);
+      localStorage.setItem(source === "employee" ? "employeeFiles" : "productFiles", JSON.stringify(tempFiles));
+    }
+  }, [fileUrl]);
 
   return (
     <>

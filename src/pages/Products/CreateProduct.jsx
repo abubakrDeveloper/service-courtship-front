@@ -21,6 +21,7 @@ import PaginatedSelect from "../../components/UI/PaginatedSelect";
 import ImageUpload from "../../components/UI/ImageUpload";
 import { PlusOutlined, DeleteOutlined, EditOutlined, ShopOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { useProductStore } from "../../store/useProductStore";
+import { deleteReq } from "../../services/deleteRequest";
 
 const CreateProduct = () => {
   const { removeTab, addTab, success, error, currentUser, activeKey, warning} = useInfoContext();
@@ -31,20 +32,27 @@ const CreateProduct = () => {
   const [fileUrl, setFileUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Form qiymatlarini local store’dan yuklash
+  // ✅ rasm o‘zgarsa formValues ichiga yozib boramiz
   useEffect(() => {
-    if (id) return; // update rejimda bo'lsa fetch haj qiladi
+    if (fileUrl) {
+      setFormValues(prev => ({ ...prev, image: fileUrl }));
+      form.setFieldsValue({ image: fileUrl }); // ✅ shu shart!
+    }
+  }, [fileUrl]);
 
-    // ✅ faqat yangi product qo‘shish rejimi
+   useEffect(() => {
+    if (id) return;
+
     if (!editingIndex) {
       form.resetFields();
       form.setFieldsValue({
+        ...formValues,
         valyuta: "UZS",
-        filialId: currentUser?.filialId
+        filialId: currentUser?.filialId || null
       });
-      setFileUrl("");
+      setFileUrl(formValues.image || "");
     }
-  }, [activeKey]); // tab qayta ochilganda reset
+  }, [activeKey]); // 
 
 
 
@@ -75,7 +83,6 @@ const CreateProduct = () => {
       error("Tavarni olishda xatolik!");
     }
   };
-  console.log(itemList);
   
   useEffect(() => {
     if (id) fetchProduct();
@@ -145,6 +152,35 @@ const CreateProduct = () => {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    const tempFiles = JSON.parse(localStorage.getItem("productFiles") || "[]");
+
+    // ✅ Faqat yangi product qo‘shilayotganda (update emas)
+    if (!editingIndex && tempFiles.length > 0) {
+      // Agar formada yoki fileUrl'da rasm bo'lmasa – oldingi vaqtinchalik rasmlarni tozalaymiz
+      if (!formValues?.image) {
+        tempFiles.forEach(async (img) => {
+          const filename = img.split("/").pop();
+          await deleteReq(filename, "files/delete");
+        });
+        localStorage.removeItem("productFiles");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (itemList.length > 0 || fileUrl) {
+        e.preventDefault();
+        e.returnValue = "Sahifani yangilasangiz ma'lumotlar o‘chib ketadi!";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [itemList, fileUrl]);
+
 
 
   return (

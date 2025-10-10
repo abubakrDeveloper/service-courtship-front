@@ -1,7 +1,7 @@
 import { Drawer, Descriptions, Image, Divider, Tag, Avatar, message } from "antd";
 import { ShopOutlined, CopyOutlined } from "@ant-design/icons";
 
-const PreviewDrawer = ({ open, onClose, preview }) => {
+const PreviewDrawer = ({ open, onClose, preview, type}) => {
   if (!preview) return null;
 
   // Copy funksiyasi
@@ -27,14 +27,14 @@ const PreviewDrawer = ({ open, onClose, preview }) => {
       />
     </div>
   );
-
+  
   return (
     <Drawer
-      title={`Tavar haqida ma'lumot`}
+      title={`${type === "product" ? "Tavar" : "Xodim"} haqida ma'lumot`}
       width={550}
       onClose={onClose}
       open={open}
-      bodyStyle={{ padding: 0 }}
+      styles={{body: {padding: 0}}}
     >
       {/* Tavar rasmi */}
       <div style={{ textAlign: "center", marginBottom: 20 }}>
@@ -65,8 +65,20 @@ const PreviewDrawer = ({ open, onClose, preview }) => {
 
       {/* Tavar tafsilotlari */}
       <Descriptions column={1} bordered size="middle" style={{ label: {width: 160}}}>
-        {preview.id && <Descriptions.Item label="Tavar ID">
+        {preview.id && <Descriptions.Item label={`ID`}>
           {copyableItem("Firma ID", preview.id)}
+        </Descriptions.Item>}
+        {preview.firstName && <Descriptions.Item label="Ism">
+          {preview.firstName}
+        </Descriptions.Item>}
+        {preview.lastName && <Descriptions.Item label="Familiyas">
+          {preview.lastName}
+        </Descriptions.Item>}
+        {preview.role && <Descriptions.Item label="Lavozim">
+          {preview.role}
+        </Descriptions.Item>}
+        {preview.phone && <Descriptions.Item label="Telefon raqami">
+          {copyableItem("Telefon raqam", preview.phone)}
         </Descriptions.Item>}
         {preview.productName && <Descriptions.Item label="Tavar nomi">
           {copyableItem("Tavar nomi", preview.productName)}

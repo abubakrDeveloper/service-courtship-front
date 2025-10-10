@@ -98,7 +98,6 @@ export const router = createBrowserRouter([
             ),
             children: [
               { index: true, element: <Products /> },
-              { path: ":id", element: <CreateProduct /> },
               { path: "new", element: <CreateProduct /> },
               { path: "edit/:id", element: <CreateProduct /> },
             ],
@@ -137,6 +136,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Employees /> },
               { path: "new", element: <AddEmployees /> },
+              { path: "edit/:id", element: <AddEmployees /> },
             ],
           },
           {

@@ -16,7 +16,7 @@ export const useProductStore = create((set) => ({
 
   setProductList: (list) => set({ itemList: list }),
 
-  setFormValues: (values) => set({ formValues: values }),
+  setFormValues: (values) => set((state) => ({ formValues: { ...state.formValues, ...values } })),
   clearFormValues: () => set({ formValues: {} }),
   setEditingIndex: (index) => set({ editingIndex: index }),
   updateProduct: (index, updatedProduct) =>

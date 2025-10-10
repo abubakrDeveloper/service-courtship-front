@@ -68,7 +68,7 @@ const Products = () => {
     try {
       if(data.image){
         const filename = data.image.split("/").pop();
-        await deleteReq(filename, "files/delete");
+        deleteReq(filename, "files/delete");
       }
       await deleteReq(data.id, `products`);
       success("Tavar o‘chirildi!");
@@ -224,7 +224,7 @@ const Products = () => {
           },
         }}
       />
-      <PreviewDrawer open={open} onClose={() => setOpen(false)} preview={preview}/>
+      <PreviewDrawer open={open} onClose={() => setOpen(false)} preview={preview} type="product"/>
     </div>
   );
 };

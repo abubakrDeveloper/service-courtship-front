@@ -12,7 +12,7 @@ export const useEmployeeStore = create((set) => ({
   images: [],
 
   // ✅ Formni kuzatish
-  setFormValues: (values) => set({ formValues: values }),
+  setFormValues: (values) => set((state) => ({ formValues: { ...state.formValues, ...values } })),
   clearFormValues: () => set({ formValues: {} }),
 
   // ✅ Rasm boshqaruvi (productStore dagidek)

@@ -17,11 +17,11 @@ const Home = () => {
       { label: "Sozlamalar", icon: <SettingOutlined />, path: "/settings", iconName: "SettingOutlined"},
     ];
     
-    if (currentUser?.role !== "MANAGER") {
-        homeItems = homeItems.filter(
-          (item) => item.path !== "/products" && item.path !== "/settings" && item.path !== "/finance"
-        );
-      }
+    if(currentUser?.role == "VIEWERADMIN"){
+      homeItems = homeItems.filter((item) =>  item.path !== "/settings");
+    } else if (currentUser?.role !== "MANAGER") {
+      homeItems = homeItems.filter((item) => item.path !== "/products" && item.path !== "/settings" && item.path !== "/finance");
+    } 
   return (
     <main>
         <div className="container">
