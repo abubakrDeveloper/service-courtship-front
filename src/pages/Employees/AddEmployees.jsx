@@ -10,7 +10,7 @@ import {
   Popconfirm,
   Avatar,
 } from "antd";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useInfoContext } from "../../context/infoContext";
 import PaginatedSelect from "../../components/UI/PaginatedSelect";
 import ImageUpload from "../../components/UI/ImageUpload";
@@ -33,13 +33,14 @@ const AddEmployees = () => {
     formValues,
     addEmployee,
     removeEmployee,
-    setEmployeeList,
+    clearImages,
     setFormValues,
     clearFormValues,
     editingIndex,
     setEditingIndex,
     updateEmployeeInList
   } = useEmployeeStore();
+  const navigate = useNavigate()
 
   const { removeTab, addTab, success, error, currentUser, activeKey, warning } = useInfoContext();
 
@@ -125,8 +126,10 @@ const AddEmployees = () => {
       // UPDATE mode (serverdan kelgan)
       await patchReq(id, newEmployee, "admins");
       success("Xodim yangilandi");
+      addTab('Xodimlar', '/employees', "TeamOutlined")
       removeTab(activeKey);
-      addTab("Xodimlar", "/employees", "TeamOutlined");
+      localStorage.removeItem("employeeFiles")
+      navigate('/employess')
       return;
     }
 
@@ -150,12 +153,12 @@ const AddEmployees = () => {
     try {
       setLoading(true);
       await Promise.all(itemList.map((item) => addReq(item, "admins")));
-      success("Barcha xodimlar muvaffaqiyatli qo‘shildi ✅");
-
-      setEmployeeList([]);
       clearFormValues();
+      success("Barcha xodimlar muvaffaqiyatli qo‘shildi ✅");
+      localStorage.removeItem("employeeFiles")
+      addTab('Xodimlar', '/employees', "TeamOutlined")
       removeTab(activeKey);
-      addTab("Xodimlar", "/employees");
+      navigate('/employess')
     } catch (err) {
       error("Saqlashda xatolik yuz berdi!");
     } finally {

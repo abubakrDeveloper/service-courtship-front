@@ -24,6 +24,7 @@ import { useProductStore } from "../../store/useProductStore";
 import { deleteReq } from "../../services/deleteRequest";
 
 const CreateProduct = () => {
+  const navigate = useNavigate()
   const { removeTab, addTab, success, error, currentUser, activeKey, warning} = useInfoContext();
   const { itemList, addProduct, removeProduct, setProductList, formValues, setFormValues, clearFormValues, editingIndex, setEditingIndex, updateProduct } = useProductStore();
   const [form] = Form.useForm();
@@ -53,9 +54,6 @@ const CreateProduct = () => {
       form.setFieldsValue({ takingPrice, sellingPercentage: percentage, sellingPrice: cheked }); // ✅ shu shart!
     }
   }, [takingPrice, percentage]);
-
-  console.log(takingPrice, percentage, form.getFieldValue('sellingPrice'));
-
 
    useEffect(() => {
     if (id) return;
@@ -92,8 +90,6 @@ const CreateProduct = () => {
   const fetchProduct = async () => {
     try {
       const res = await getReq(`products/${id}`);
-      console.log(res);
-      
       const product = res.data;
       form.setFieldsValue(product);
       setFileUrl(product.image || "");
@@ -121,7 +117,10 @@ const CreateProduct = () => {
       // UPDATE mode (serverdan kelgan)
       await patchReq(id, newProduct, "products");
       success("Tavar yangilandi");
+      localStorage.removeItem("productFiles")
+      addTab('Tovarlar', '/products', "OrderedListOutlined")  
       removeTab(activeKey);
+      navigate('/products')
       return;
     }
     
@@ -161,10 +160,12 @@ const CreateProduct = () => {
       );
       success("Barcha tavarlar qo‘shildi!");
 
+      addTab('Tovarlar', '/products', "OrderedListOutlined")
       setProductList([]);
       clearFormValues();
-      addTab('Tovarlar', '/products', "OrderedListOutlined")
+      localStorage.removeItem("productFiles")
       removeTab(activeKey);
+      navigate('/products')
     } catch (err) {
       console.error(err);
       error("Saqlashda xatolik!");

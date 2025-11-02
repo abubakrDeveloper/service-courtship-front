@@ -2,7 +2,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import { getOneReq } from "../services/getRequeset";
 
 const InfoContext = createContext(null);
@@ -40,7 +39,7 @@ export const InfoProvider = ({ children }) => {
     setTabs([...tabs, { key: path, label, path, icon }])
   }
   setActiveKey(path);
-  navigate(path);
+  return navigate(path);
 };
 
   const removeTab = (targetKey) => {
@@ -52,7 +51,7 @@ export const InfoProvider = ({ children }) => {
 
     const lastTab = newTabs[newTabs.length - 1];
     setActiveKey(lastTab.key);
-    navigate(lastTab.path);
+    return navigate(lastTab.path);
   };
 
   const [messageApi, contextHolder] = message.useMessage();
