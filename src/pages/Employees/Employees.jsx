@@ -11,9 +11,9 @@ import PaginatedSelect from "../../components/UI/PaginatedSelect";
 const Employees = () => {
   const { addTab, error, success, currentUser } = useInfoContext();
   const [filters, setFilters] = useState({
-    productName: "",
+    firstName: "",
+    lastName: "",
     filialId: currentUser.filialId || "",
-    firmId: "",
     categoryId: "",
   });
 
@@ -33,16 +33,16 @@ const Employees = () => {
       setLoading(true);
 
       const params = new URLSearchParams({
-        ...(filters.productName && { productName: filters.productName }),
+        ...(filters.firstName && { firstName: filters.firstName }),
+        ...(filters.lastName && { lastName: filters.lastName }),
         ...(filters.filialId && { filialId: filters.filialId }),
-        ...(filters.firmId && { firmId: filters.firmId }),
         ...(filters.categoryId && { categoryId: filters.categoryId }),
         page,
         limit,
       });  
 
-      const {data} = await getReq(`admins`); 
-      const resList = data?.filter(i => i.id !== currentUser.id)
+      const {data} = await getReq(`admins?${params.toString()}`); 
+      const resList = data?.data.filter(i => i.id !== currentUser.id)
       setData(resList);
       setPagination({
         current: data.page,
@@ -76,6 +76,8 @@ const Employees = () => {
       error("O‘chirishda xatolik!");
     }
   };
+            console.log(data);
+
 
   const columns = [
     {
@@ -84,9 +86,14 @@ const Employees = () => {
       render: (image) => (
         image ? (
           <img
-            src={`${import.meta.env.VITE_SERVER_URL}${image}`}
-            alt="Xodim rasmi"
-            style={{ width: 60, height: 50, objectFit: "contain", borderRadius: 8 }}
+            src={image.includes('http') ? image :`${import.meta.env.VITE_SERVER_URL}${image}`}
+            alt={image}
+            style={{
+              width: 60, 
+              height: 50,  
+              borderRadius: 8,
+              objectFit: "contain",
+            }}
           />
         ) : (
           <Avatar size={45} style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}
@@ -148,10 +155,21 @@ const Employees = () => {
         </Col>
         <Col xs={24} sm={12} md={6}>
           <Input.Search
-            placeholder="Xodim ismi bo‘yicha qidirish"
-            value={filters.productName}
+            placeholder="Ismi bo‘yicha qidirish"
+            value={filters.firstName}
             onChange={(e) =>
-              setFilters((prev) => ({ ...prev, productName: e.target.value }))
+              setFilters((prev) => ({ ...prev, firstName: e.target.value }))
+            }
+            onSearch={() => fetchEmployees({ page: 1, limit: pagination.pageSize })}
+            allowClear
+          />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Input.Search
+            placeholder="Familiyasi bo‘yicha qidirish"
+            value={filters.lastName}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, lastName: e.target.value }))
             }
             onSearch={() => fetchEmployees({ page: 1, limit: pagination.pageSize })}
             allowClear
@@ -172,7 +190,7 @@ const Employees = () => {
         </Col>
       </Row>
 
-
+            
 
       {/* Jadval */}
       <Table

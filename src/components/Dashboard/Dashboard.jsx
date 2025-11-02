@@ -65,9 +65,9 @@ const Dashboard = () => {
     {
       key: "production",
       icon: <DesktopOutlined />,
-      label: "Ishlab chiqarish",
+      label: "Smena",
       roles: ["ADMIN", "MANAGER", "VIEWERADMIN"],
-      onClick: () => addTab("Ishlab chiqarish", "/production", "DesktopOutlined"),
+      onClick: () => addTab("Smena ", "/shift", "DesktopOutlined"),
     },
     {
       key: "finance",
@@ -130,7 +130,7 @@ const Dashboard = () => {
         <Menu
           theme={theme === "dark" ? "dark" : "light"}
           mode="inline"
-          style={{ display: "flex", flexDirection: "column", height: "92%", position: 'relative' }}
+          style={{ display: "flex", flexDirection: "column", height: "92%" }}
           items={[
             // Rol asosida filterlangan itemlar
             ...allowedItems.map(item => ({
@@ -139,15 +139,6 @@ const Dashboard = () => {
               label: item.label,
               onClick: item.onClick,
             })),
-
-            // Exit button doimo pastda
-            {
-              key: "exit",
-              icon: <LogoutOutlined />,
-              label: "Chiqish",
-              onClick: exit,
-            style: { position: "absolute", bottom: (window.innerWidth >= 500 && !collapsed) ? 50 : 10, left: 0 , color: "white", backgroundColor: "red" },
-            },
           ]}
         />
 
@@ -156,6 +147,7 @@ const Dashboard = () => {
 
       <Layout>
         <Header
+          className="dashboard-header"
           style={{ padding: "20px 0 0 10px", background: "transparent"}}
         >
           <Tabs

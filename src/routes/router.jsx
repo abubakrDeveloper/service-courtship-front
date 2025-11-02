@@ -12,7 +12,6 @@ import Dashboard from "../components/Dashboard/Dashboard";
 import Reports from "../pages/Reports/Reports";
 import Products from "../pages/Products/Products";
 import Inventory from "../pages/Inventory/Inventory";
-import Production from "../pages/Production/Production";
 import Finance from "../pages/Finance/Finance";
 import Employees from "../pages/Employees/Employees";
 import Customers from "../pages/Customers/Customers";
@@ -23,6 +22,11 @@ import ProtectedRoute from "../layouts/ProtectedRoute";
 import CreateProduct from "../pages/Products/CreateProduct";
 import Profile from "../pages/Profile/Profile";
 import AddEmployees from "../pages/Employees/AddEmployees";
+import Smena from "../pages/Smena/Smena";
+import Kassa from "../pages/Kassa/Kassa";
+import Chek1 from "../pages/CHeklar/Chek";
+import Chek2 from "../pages/CHeklar/Chek2";
+import Chek3 from "../pages/CHeklar/Chek3";
 
 // 🎨 ConfigProvider ThemeWrapper
 const ThemeWrapper = ({ children }) => {
@@ -111,10 +115,47 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "production",
+            path: "shift",
             element: (
               <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
-                <Production />
+                <Smena/>
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "cash",
+            element: (
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
+                <Kassa/>
+              </ProtectedRoute>
+            ),
+            children: [
+              { index: true, element: <Products /> },
+              { path: "check", element: <Chek1 /> },
+              { path: "chech/:id", element: <Chek1 /> },
+            ],
+          },
+            {
+            path: "Chek1",
+            element: (
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
+                <Chek1/>
+              </ProtectedRoute>
+            ),
+          },
+           {
+            path: "Chek2",
+            element: (
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
+                <Chek2/>
+              </ProtectedRoute>
+            ),
+          },
+           {
+            path: "Chek3",
+            element: (
+              <ProtectedRoute roles={["ADMIN", "MANAGER"]}>
+                <Chek3/>
               </ProtectedRoute>
             ),
           },

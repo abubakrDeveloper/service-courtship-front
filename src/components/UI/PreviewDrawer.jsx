@@ -3,7 +3,8 @@ import { ShopOutlined, CopyOutlined } from "@ant-design/icons";
 
 const PreviewDrawer = ({ open, onClose, preview, type}) => {
   if (!preview) return null;
-
+  console.log(preview);
+  
   // Copy funksiyasi
   const handleCopy = async (text, label) => {
     try {
@@ -40,7 +41,7 @@ const PreviewDrawer = ({ open, onClose, preview, type}) => {
       <div style={{ textAlign: "center", marginBottom: 20 }}>
         {preview?.image ? (
           <Image
-            src={`${import.meta.env.VITE_SERVER_URL}${preview.image}`}
+            src={preview?.image.includes('http') ? preview?.image :`${import.meta.env.VITE_SERVER_URL}${preview.image}`}
             alt={preview.productName}
             width={200}
             height={190}
@@ -85,6 +86,7 @@ const PreviewDrawer = ({ open, onClose, preview, type}) => {
         </Descriptions.Item>}
 
         {preview.count && <Descriptions.Item label="Soni">{preview.count}</Descriptions.Item>}
+        {preview.sellingType && preview.countType && <Descriptions.Item label="Tavar hajmi">{preview.countType} <Tag color="red">{preview.sellingType}</Tag></Descriptions.Item>}
 
         {preview.takingPrice && <Descriptions.Item label="Olish narxi">
           {Number(preview.takingPrice).toLocaleString()} {preview.valyuta}
@@ -124,7 +126,7 @@ const PreviewDrawer = ({ open, onClose, preview, type}) => {
 
         {preview.date && (
           <Descriptions.Item label="Qo‘shilgan sana">
-            {new Date(preview.date).toLocaleDateString("uz-UZ")}
+            {new Date(preview.date).toLocaleDateString()}
           </Descriptions.Item>
         )}
       </Descriptions>

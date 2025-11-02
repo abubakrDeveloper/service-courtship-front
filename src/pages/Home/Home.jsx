@@ -10,7 +10,7 @@ const Home = () => {
       { label: "Hisobotlar", icon: <FileOutlined />, path: "/reports", iconName: "FileOutlined"},
       { label: "Tovarlar", icon: <OrderedListOutlined />, path: "/products", iconName: "OrderedListOutlined"},
       { label: "Inventarizatsiya", icon: <PieChartOutlined />, path: "/inventory", iconName: "PieChartOutlined"},
-      { label: "Ishlab chiqarish", icon: <DesktopOutlined />, path: "/production", iconName: "DesktopOutlined"},
+      { label: "Smena", icon: <DesktopOutlined />, path: "/shift", iconName: "DesktopOutlined"},
       { label: "Moliya", icon: <MoneyCollectOutlined />, path: "/finance", iconName: "MoneyCollectOutlined"},
       { label: "Xodimlar", icon: <TeamOutlined />, path: "/employees", iconName: "TeamOutlined"},
     //   { label: "Mijozlar", icon: <UserOutlined />, path: "/customers", iconName: "UserOutlined"},

@@ -5,7 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useInfoContext } from "../../context/infoContext";
 import ImageUpload from "../../components/UI/ImageUpload";
-import { updateReq } from "../../services/putRequest";
+import { patchReq } from "../../services/putRequest";
 import { deleteReq } from "../../services/deleteRequest";
 
 const { Title, Text } = Typography;
@@ -41,18 +41,16 @@ const Profile = () => {
       if (values.password) {
         updatedUser.password = values.password;
       }
-      console.log(updatedUser);
+      const res = await patchReq(user.id, updatedUser, 'admins')
+      console.log(res);
       
-      const res = await updateReq(user.id, updatedUser, 'admins')
       if(imageUrl && imageUrl !== ""){
         removeImage(user.image)
       }
-      console.log(res);
-      
       success("Profil muvaffaqiyatli yangilandi!");
-      setCurrentUser(updatedUser);
+      setCurrentUser(res.data);
+      setOpen(false)
     } catch (err) {
-      console.error(err);
       error("Xatolik yuz berdi!");
     } finally {
       setConfirmLoading(false);

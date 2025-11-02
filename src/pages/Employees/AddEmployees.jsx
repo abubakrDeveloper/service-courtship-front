@@ -23,7 +23,7 @@ import {
 } from "@ant-design/icons";
 import { useEmployeeStore } from "../../store/useEmployeeStore";
 import { addReq } from "../../services/addRequest";
-import { updateReq } from "../../services/putRequest";
+import { patchReq } from "../../services/putRequest";
 import { getReq } from "../../services/getRequeset";
 import { deleteReq } from "../../services/deleteRequest";
 
@@ -51,7 +51,6 @@ const AddEmployees = () => {
 
   // ✅ Form change
   const handleFormChange = (_, allValues) => setFormValues(allValues);
-  console.log(formValues);
   
   useEffect(() => {
     if (fileUrl) {
@@ -84,18 +83,13 @@ const AddEmployees = () => {
    const fetchEmployee = async () => {
       try {
         const {data} = await getReq(`admins/${id}`);
-        console.log(data);
-    
         delete data.password
         form.setFieldsValue(data);
         setFileUrl(data.image || "");
-      } catch(err) {
-        console.log(err);
-        
+      } catch(err) {        
         error("Xodimni olishda xatolik!");
       }
     };
-    console.log(itemList);
     
     useEffect(() => {
       if (id) fetchEmployee();
@@ -129,10 +123,10 @@ const AddEmployees = () => {
 
     if (id) {
       // UPDATE mode (serverdan kelgan)
-      await updateReq(id, newEmployee, "admins");
+      await patchReq(id, newEmployee, "admins");
       success("Xodim yangilandi");
-      addTab("Xodimlar", "/employees");
       removeTab(activeKey);
+      addTab("Xodimlar", "/employees", "TeamOutlined");
       return;
     }
 
@@ -163,8 +157,6 @@ const AddEmployees = () => {
       removeTab(activeKey);
       addTab("Xodimlar", "/employees");
     } catch (err) {
-      console.log(err);
-      
       error("Saqlashda xatolik yuz berdi!");
     } finally {
       setLoading(false);

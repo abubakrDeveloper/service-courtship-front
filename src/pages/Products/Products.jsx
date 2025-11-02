@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Space, Popconfirm, Avatar, Input, Select, Row, Col} from "antd";
+import { Button, Table, Space, Popconfirm, Avatar, Input, Row, Col} from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, ShopOutlined } from "@ant-design/icons";
 import { useInfoContext } from "../../context/infoContext";
-import axios from "axios";
 import { getReq } from "../../services/getRequeset";
 import PreviewDrawer from "../../components/UI/PreviewDrawer";
 import { deleteReq } from "../../services/deleteRequest";
@@ -97,23 +96,24 @@ const Products = () => {
       ),
     },
     { title: "Nomi", dataIndex: "productName" },
-    { title: "Olish narxi", dataIndex: "takingPrice" },
+    // { title: "Olish narxi", dataIndex: "takingPrice" },
     { title: "Sotish narxi", dataIndex: "sellingPrice" },
-    { title: "Valyuta", dataIndex: "valyuta" },
+    // { title: "Valyuta", dataIndex: "valyuta" },
     { title: "Sotish foizi", dataIndex: "sellingPercentage", render: (sellingPercentage) => {
       return `${sellingPercentage}%`
     }},
-    { title: "Chegirma (%)", dataIndex: "promotion", render: (promotion) => {
+    { title: "Sotish foizi", dataIndex: "promotion", render: (promotion) => {
       return `${promotion}%`
+    }},
+    { title: "Miqdori", dataIndex: "countType", render: (countType) => {
+      return `${countType}`
+    } },
+    { title: "Hajmi", dataIndex: "sellingType", render: (sellingType) => {
+      return `${sellingType}`
     } },
     { title: "Soni", dataIndex: "count" },
     { title: "Qo'shilgan sanasi", dataIndex: "date",  render: (date) => {
-      if (!date) return "----";
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, "0");
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const year = d.getFullYear();
-      return `${day}.${month}.${year}`; // masalan: 07.10.2025
+      return new Date(date).toLocaleDateString();
     }},
     { title: `QR kodi`, dataIndex: "Qrcode" },
     {

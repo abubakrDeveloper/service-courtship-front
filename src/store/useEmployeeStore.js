@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { getReq } from "../services/getRequeset";
 import { addReq } from "../services/addRequest";
-import { updateReq } from "../services/putRequest";
+import { patchReq } from "../services/putRequest";
 
 export const useEmployeeStore = create((set) => ({
   itemList: [],
@@ -66,6 +66,6 @@ export const useEmployeeStore = create((set) => ({
 
   // ✅ Serverda yangilash
   updateEmployeeToServer: async (id, data) => {
-    return await updateReq(id, data, "admins");
+    return await patchReq(id, data, "admins");
   },
 }));

@@ -1,15 +1,17 @@
-.ant-tabs-tab-active{
-    background-color: #1677FF !important;
-    span{
-        color: white;
+.dashboard-header{
+    .ant-tabs-tab-active{
+        background-color: #1677FF !important;
+        span{
+            color: white;
+        }
+        .anticon-close{
+            color: wheat;
+        }
     }
-    .anticon-close{
-        color: wheat;
+    
+    .tab-label{
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
-}
-
-.tab-label{
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }

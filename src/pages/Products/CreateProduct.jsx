@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { getReq } from "../../services/getRequeset";
-import { updateReq } from "../../services/putRequest";
+import { patchReq } from "../../services/putRequest";
 import { addReq } from "../../services/addRequest";
 import { useInfoContext } from "../../context/infoContext";
 import PaginatedSelect from "../../components/UI/PaginatedSelect";
@@ -30,6 +30,8 @@ const CreateProduct = () => {
   const { id } = useParams();
 
   const [fileUrl, setFileUrl] = useState("");
+  const [percentage, setPercentage] = useState(form.getFieldValue('sellingPercentage') || 0);
+  const [takingPrice, setTakingPrice] = useState(form.getFieldValue('takingPrice') || 0);
   const [loading, setLoading] = useState(false);
 
   // ✅ rasm o‘zgarsa formValues ichiga yozib boramiz
@@ -40,6 +42,21 @@ const CreateProduct = () => {
     }
   }, [fileUrl]);
 
+  useEffect(() => {
+     if (takingPrice && percentage >= 0) {
+      if(form.getFieldValue('sellingPrice')){
+        setFormValues(prev => ({ ...prev,  sellingPrice: takingPrice }));
+        form.setFieldsValue({ sellingPrice: takingPrice });
+      }
+      const cheked = percentage !== 0 ? (takingPrice * percentage / 100) + takingPrice : takingPrice
+      setFormValues(prev => ({ ...prev, takingPrice, sellingPercentage: percentage, sellingPrice: cheked }));
+      form.setFieldsValue({ takingPrice, sellingPercentage: percentage, sellingPrice: cheked }); // ✅ shu shart!
+    }
+  }, [takingPrice, percentage]);
+
+  console.log(takingPrice, percentage, form.getFieldValue('sellingPrice'));
+
+
    useEffect(() => {
     if (id) return;
 
@@ -48,6 +65,7 @@ const CreateProduct = () => {
       form.setFieldsValue({
         ...formValues,
         valyuta: "UZS",
+        sellingType: "KG",
         filialId: currentUser?.filialId || null
       });
       setFileUrl(formValues.image || "");
@@ -95,12 +113,13 @@ const CreateProduct = () => {
     const newProduct = {
       ...values,
       valyuta: values.valyuta || "UZS",
+      sellingType: values.sellingType || "KG",
       image: fileUrl, // rasm
     };
 
     if (id) {
       // UPDATE mode (serverdan kelgan)
-      await updateReq(id, newProduct, "products");
+      await patchReq(id, newProduct, "products");
       success("Tavar yangilandi");
       removeTab(activeKey);
       return;
@@ -118,6 +137,7 @@ const CreateProduct = () => {
     setFormValues({});
     form.setFieldsValue({
       valyuta: "UZS", // ✅ resetdan keyin qaytarib qo‘yish
+      sellingType: "KG", // ✅ resetdan keyin qaytarib qo‘yish
       filialId: currentUser?.filialId // ✅ default filial qayta chiqishi
     });
   };
@@ -265,6 +285,27 @@ const CreateProduct = () => {
               <Form.Item name="count" label="Tavar soni" rules={[{ required: true, message: "Sonini kiriting" }]}>
                 <InputNumber placeholder="0" min={0} style={{ width: "100%" }} />
               </Form.Item>
+              <Form.Item
+                name="countType"
+                label="Tavar hajmi"
+                rules={[{ required: true, message: "Tavar hajmini kiriting" }]}
+              >
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  addonAfter={
+                    <Form.Item name="sellingType" noStyle>
+                      <Select style={{ width: 80 }}>
+                        <Select.Option value="KG">KG</Select.Option>
+                        <Select.Option value="DONA">Dona</Select.Option>
+                        <Select.Option value="L">L</Select.Option>
+                        <Select.Option value="M">M</Select.Option>
+                      </Select>
+                    </Form.Item>
+                  }
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
             </div>
           </div>
 
@@ -276,6 +317,7 @@ const CreateProduct = () => {
             <InputNumber
               placeholder="10000"
               min={0}
+              onChange={(e) => setTakingPrice(e)}
               addonAfter={
                 <Form.Item name="valyuta" noStyle>
                   <Select style={{ width: 80 }}>
@@ -288,13 +330,17 @@ const CreateProduct = () => {
             />
           </Form.Item>
 
+          <Form.Item name="sellingPercentage" label="Tavar sotish foizi (%)" rules={[{ required: true, message: "" }]}>
+            <InputNumber  onChange={(e) => setPercentage(e)} placeholder="0" min={0} max={100} style={{ width: "100%" }} />
+          </Form.Item>
+
           <Form.Item
             name="sellingPrice"
             label="Tavar sotish narxi"
             rules={[{ required: true, message: "Sotish narxini kiriting" }]}
           >
             <InputNumber
-            placeholder="12000"
+              placeholder="0"
               min={0}
               addonAfter={
                 <Form.Item name="valyuta" noStyle>
@@ -308,13 +354,9 @@ const CreateProduct = () => {
             />
           </Form.Item>
 
-          <Form.Item name="promotion" label="Tavar chegirma foizi (%)" rules={[{ required: true, message: "Chegirma foizini kiriting" }]}>
+          {id && <Form.Item name="promotion" label="Tavar chegirma foizi (%)" rules={[{ required: true, message: "Chegirma foizini kiriting" }]}>
             <InputNumber placeholder="0" min={0} max={100} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="sellingPercentage" label="Tavar sotish foizi (%)" rules={[{ required: true, message: "Sotish foizini kiriting" }]}>
-            <InputNumber placeholder="0" min={0} max={100} style={{ width: "100%" }} />
-          </Form.Item>
+          </Form.Item>}
 
           <Form.Item name="Qrcode" label="Tavar QR kodi" rules={[{ required: true, message: "Qr kodni kiriting" }]}>
             <Input placeholder="1234567890123" />
