@@ -23,18 +23,11 @@ export default function Smena() {
   const fetchCurrentShift = async () => {
     try {
       const { data } = await getReq("kassa");
-      console.log("Kassa list:", data);
-      
-      const kassaList = Array.isArray(data) ? data : data?.data || [];
-
-      // oxirgi smena yoki yopilmagan smena
       const activeShift = localStorage.getItem("activeShift")
 
       setCurrentShift(activeShift);
-
-      // agar faol smena bo‘lsa → avtomatik kassaga yo‘naltir
       if (activeShift) {
-        // navigate("/cash");
+        navigate("/cash");
       }
     } catch (err) {
       console.error("Smena olishda xato:", err);
